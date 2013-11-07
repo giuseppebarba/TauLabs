@@ -421,6 +421,45 @@ static void bl_fsm_init(struct bl_fsm_context *context)
 
 static void process_packet_rx(struct bl_fsm_context * context, const struct bl_messages * msg);
 
+/* Try to bind DSMx satellite using specified number of pulses */
+static void DSM_Bind(uint8_t bind)
+{
+	GPIO_InitTypeDef GPIO_InitStructure;
+
+	if (bind)
+	{
+		GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_UP;
+		GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_9;
+		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+		GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_OUT;
+		GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+		GPIO_InitStructure.GPIO_PuPd  = GPIO_PuPd_NOPULL;
+
+		/* just to limit bind pulses */
+		if (bind > 10)
+			bind = 10;
+
+		GPIO_Init(GPIOD, (GPIO_InitTypeDef*)&GPIO_InitStructure);
+
+		/* RX line, set high */
+		GPIO_SetBits(GPIOD, GPIO_InitStructure.GPIO_Pin);
+
+		/* on CC works up to 140ms, guess bind window is around 20-140ms after power up */
+		PIOS_DELAY_WaitmS(20);
+
+		for (int i = 0; i < bind ; i++) {
+			/* RX line, drive low for 120us */
+			GPIO_ResetBits(GPIOD, GPIO_InitStructure.GPIO_Pin);
+			PIOS_DELAY_WaituS(120);
+			/* RX line, drive high for 120us */
+			GPIO_SetBits(GPIOD, GPIO_InitStructure.GPIO_Pin);
+			PIOS_DELAY_WaituS(120);
+		}
+		PIOS_DELAY_WaituS(120);
+		GPIO_DeInit(GPIOD);
+	}
+}
+
 int main(void)
 {
 	/* Configure and enable system clocks */
@@ -432,6 +471,8 @@ int main(void)
 	/* Initialize the bootloader FSM */
 	struct bl_fsm_context bl_fsm_context;
 	bl_fsm_init(&bl_fsm_context);
+
+	DSM_Bind(0);
 
 	/* Check if the user has requested that we boot into DFU mode */
 	PIOS_IAP_Init();
