@@ -197,7 +197,9 @@ static int PIOS_DSM_UnrollChannels(struct pios_dsm_dev *dsm_dev)
 		break;
 	default:
 		/* unknown yet data stream */
-		goto stream_error;
+        /* OrangeRX R100 satellite hasn't standard header. Assume 
+           10bits resolution */
+		resolution = 10;
 	}
 
 	/* unroll channels */
