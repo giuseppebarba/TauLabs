@@ -6,7 +6,7 @@
 # @{
 # @addtogroup 
 # @{
-# @brief Makefile to build UAVObject code for flying f4 board.
+# @brief Makefile to build UAVObject code for flying f3 board.
 ###############################################################################
 #
 # This program is free software; you can redistribute it and/or modify
@@ -46,6 +46,9 @@ UAVOBJSRCFILENAMES += baroaltitude
 UAVOBJSRCFILENAMES += baroairspeed
 UAVOBJSRCFILENAMES += airspeedsettings
 UAVOBJSRCFILENAMES += airspeedactual
+UAVOBJSRCFILENAMES += fixedwingairspeeds
+UAVOBJSRCFILENAMES += fixedwingpathfollowersettings
+UAVOBJSRCFILENAMES += fixedwingpathfollowerstatus
 UAVOBJSRCFILENAMES += flightbatterysettings
 UAVOBJSRCFILENAMES += firmwareiapobj
 UAVOBJSRCFILENAMES += flightbatterystate
@@ -53,17 +56,12 @@ UAVOBJSRCFILENAMES += flightplancontrol
 UAVOBJSRCFILENAMES += flightplansettings
 UAVOBJSRCFILENAMES += flightplanstatus
 UAVOBJSRCFILENAMES += flighttelemetrystats
-UAVOBJSRCFILENAMES += fixedwingairspeeds
-UAVOBJSRCFILENAMES += fixedwingpathfollowersettings
-UAVOBJSRCFILENAMES += fixedwingpathfollowerstatus
 UAVOBJSRCFILENAMES += gcstelemetrystats
 UAVOBJSRCFILENAMES += gcsreceiver
 UAVOBJSRCFILENAMES += gpsposition
 UAVOBJSRCFILENAMES += gpssatellites
 UAVOBJSRCFILENAMES += gpstime
 UAVOBJSRCFILENAMES += gpsvelocity
-UAVOBJSRCFILENAMES += groundpathfollowersettings
-UAVOBJSRCFILENAMES += loitercommand
 UAVOBJSRCFILENAMES += vtolpathfollowersettings
 UAVOBJSRCFILENAMES += vtolpathfollowerstatus
 UAVOBJSRCFILENAMES += homelocation
@@ -98,7 +96,7 @@ UAVOBJSRCFILENAMES += velocityactual
 UAVOBJSRCFILENAMES += velocitydesired
 UAVOBJSRCFILENAMES += watchdogstatus
 UAVOBJSRCFILENAMES += flightstatus
-UAVOBJSRCFILENAMES += hwflyingf4
+UAVOBJSRCFILENAMES += hwflyingf3
 UAVOBJSRCFILENAMES += modulesettings
 UAVOBJSRCFILENAMES += receiveractivity
 UAVOBJSRCFILENAMES += cameradesired
@@ -107,17 +105,19 @@ UAVOBJSRCFILENAMES += altitudeholdsettings
 UAVOBJSRCFILENAMES += altitudeholddesired
 UAVOBJSRCFILENAMES += waypoint
 UAVOBJSRCFILENAMES += waypointactive
+UAVOBJSRCFILENAMES += groundpathfollowersettings
+UAVOBJSRCFILENAMES += hottsettings
 UAVOBJSRCFILENAMES += ubloxinfo
-UAVOBJSRCFILENAMES += picocsettings
-UAVOBJSRCFILENAMES += picocstatus
+UAVOBJSRCFILENAMES += loitercommand
 
 UAVOBJSRCFILENAMES += txpidsettings
 
+UAVOBJSRCFILENAMES += i2cvm
+UAVOBJSRCFILENAMES += i2cvmuserprogram
 UAVOBJSRCFILENAMES += vibrationanalysissettings
 UAVOBJSRCFILENAMES += vibrationanalysisoutput
 UAVOBJSRCFILENAMES += trimangles
 UAVOBJSRCFILENAMES += trimanglessettings
-
 UAVOBJSRCFILENAMES += sessionmanaging
 
 UAVOBJSRC = $(foreach UAVOBJSRCFILE,$(UAVOBJSRCFILENAMES),$(OPUAVSYNTHDIR)/$(UAVOBJSRCFILE).c )

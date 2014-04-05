@@ -179,6 +179,9 @@
 #if defined(PIOS_INCLUDE_WAVE)
 #include <pios_wavplay.h>
 #endif
+#if defined(PIOS_INCLUDE_LIS3DSH)
+#include <pios_lis3dsh.h>
+#endif
 
 #if defined(PIOS_INCLUDE_FLASH)
 #include <pios_flash.h>

@@ -43,6 +43,49 @@
 #include "manualcontrolsettings.h"
 #include "modulesettings.h"
 
+/**
+ * Configuration for L3GD20 chip
+ */
+#if defined(PIOS_INCLUDE_LIS3DSH)
+#include "pios_lis3dsh.h"
+static const struct pios_exti_cfg pios_exti_lis3dsh_cfg __exti_config = {
+	.vector = PIOS_LIS3DSH_IRQHandler,
+	.line = EXTI_Line1,
+	.pin = {
+		.gpio = GPIOE,
+		.init = {
+			.GPIO_Pin = GPIO_Pin_1,
+			.GPIO_Speed = GPIO_Speed_50MHz,
+			.GPIO_Mode = GPIO_Mode_IN,
+			.GPIO_OType = GPIO_OType_OD,
+			.GPIO_PuPd = GPIO_PuPd_NOPULL,
+		},
+	},
+	.irq = {
+		.init = {
+			.NVIC_IRQChannel = EXTI1_IRQn,
+			.NVIC_IRQChannelPreemptionPriority = PIOS_IRQ_PRIO_HIGH,
+			.NVIC_IRQChannelSubPriority = 0,
+			.NVIC_IRQChannelCmd = ENABLE,
+		},
+	},
+	.exti = {
+		.init = {
+			.EXTI_Line = EXTI_Line1, // matches above GPIO pin
+			.EXTI_Mode = EXTI_Mode_Interrupt,
+			.EXTI_Trigger = EXTI_Trigger_Rising,
+			.EXTI_LineCmd = ENABLE,
+		},
+	},
+};
+
+static const struct pios_lis3dsh_cfg pios_lis3dsh_cfg = {
+	.exti_cfg = &pios_exti_lis3dsh_cfg,
+	.range = PIOS_LIS3DSH_ACCEL_8G,
+	//.orientation = PIOS_L3GD20_TOP_0DEG, FIXME
+};
+#endif /* PIOS_INCLUDE_L3GD20 */
+
 /* One slot per selectable receiver group.
  *  eg. PWM, PPM, GCS, DSMMAINPORT, DSMFLEXIPORT, SBUS
  * NOTE: No slot in this map for NONE.
@@ -144,6 +187,12 @@ void PIOS_Board_Init(void) {
 #if defined(PIOS_INCLUDE_LED)
 	PIOS_LED_Init(&pios_led_cfg);
 #endif	/* PIOS_INCLUDE_LED */
+
+#if defined(PIOS_INCLUDE_SPI)
+	if (PIOS_SPI_Init(&pios_spi_accel_id, &pios_spi_accel_cfg)) {
+		PIOS_DEBUG_Assert(0);
+	}
+#endif
 
 #if defined(PIOS_INCLUDE_FLASH)
 	/* Inititialize all flash drivers */
@@ -333,7 +382,14 @@ void PIOS_Board_Init(void) {
 	
 #endif	/* PIOS_INCLUDE_USB */
 
+	PIOS_SENSORS_Init();
 
+#if defined(PIOS_INCLUDE_LIS3DSH) && defined(PIOS_INCLUDE_SPI)
+	if (PIOS_LIS3DSH_Init(pios_spi_accel_id, 0, &pios_lis3dsh_cfg) != 0)
+		panic(2);
+	if (PIOS_LIS3DSH_Test() != 0)
+		panic(3);
+#endif
 
 	/* Configure the main IO port */
 	uint8_t hw_mainport;

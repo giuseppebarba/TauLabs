@@ -32,9 +32,18 @@ include $(BOARD_INFO_DIR)/board-info.mk
 DEBUG ?= NO
 
 # List of modules to include
-MODULES += FirmwareIAP 
+MODULES = Sensors
+//MODULES += Attitude
+//MODULES += Actuator
+//MODULES += ManualControl
+//MODULES += Stabilization
+MODULES += FirmwareIAP
 MODULES += Telemetry
 
+OPTMODULES += GPS
+OPTMODULES += GenericI2CSensor
+OPTMODULES += AltitudeHold
+OPTMODULES += ComUsbBridge
 
 # Paths
 OPUAVTALKINC = $(OPUAVTALK)/inc
@@ -46,7 +55,7 @@ MATHLIBINC = $(FLIGHTLIB)/math
 PIOSSTM32F4XX = $(PIOS)/STM32F4xx
 PIOSCOMMON = $(PIOS)/Common
 PIOSCOMMONLIB = $(PIOSCOMMON)/Libraries
-APPLIBDIR = $(PIOSSTM32F4XX)/Libraries
+APPLIBDIR = $(PIOSSTM32F30X)/Libraries
 STMLIBDIR = $(APPLIBDIR)
 STMSPDDIR = $(STMLIBDIR)/STM32F4xx_StdPeriph_Driver
 STMSPDSRCDIR = $(STMSPDDIR)/src
@@ -54,6 +63,9 @@ STMSPDINCDIR = $(STMSPDDIR)/inc
 DEBUG_CM3_DIR = $(PIOSCOMMONLIB)/Debug
 DEBUG_CM3_DIR_INC = $(DEBUG_CM3_DIR)/inc
 OPUAVOBJINC = $(OPUAVOBJ)/inc
+FLIGHTPLANLIB = $(OPMODULEDIR)/FlightPlan/lib
+FLIGHTPLANS = $(OPMODULEDIR)/FlightPlan/flightplans
+MAVLINKINC = $(FLIGHTLIB)/mavlink/v1.0/common
 
 SRC = 
 # optional component libraries
@@ -80,9 +92,17 @@ SRC += $(OPUAVOBJ)/eventdispatcher.c
 SRC += $(DEBUG_CM3_DIR)/dcc_stdio.c
 SRC += $(DEBUG_CM3_DIR)/cm3_fault_handlers.c
 #endif
-
+SRC += $(FLIGHTLIB)/paths.c
 SRC += $(FLIGHTLIB)/fifo_buffer.c
+SRC += $(FLIGHTLIB)/WorldMagModel.c
+SRC += $(FLIGHTLIB)/insgps13state.c
 SRC += $(FLIGHTLIB)/taskmonitor.c
+SRC += $(FLIGHTLIB)/sanitycheck.c
+SRC += $(MATHLIB)/coordinate_conversions.c
+SRC += $(MATHLIB)/sin_lookup.c
+SRC += $(MATHLIB)/misc_math.c
+SRC += $(MATHLIB)/pid.c
+SRC += $(MATHLIB)/atmospheric_math.c
 
 ## PIOS Hardware (STM32F4xx)
 include $(PIOS)/STM32F4xx/library_fw.mk
@@ -92,6 +112,7 @@ SRC += $(PIOSCOMMON)/pios_delay.c
 SRC += $(PIOSCOMMON)/pios_crc.c
 SRC += $(PIOSCOMMON)/pios_com.c
 SRC += $(PIOSCOMMON)/pios_rcvr.c
+SRC += $(PIOSCOMMON)/pios_lis3dsh.c
 SRC += $(PIOSCOMMON)/pios_gcsrcvr.c
 SRC += $(PIOSCOMMON)/pios_flashfs_logfs.c
 SRC += $(PIOSCOMMON)/printf-stdarg.c
@@ -101,6 +122,8 @@ SRC += $(PIOSCOMMON)/pios_usb_util.c
 SRC += $(PIOSCOMMON)/pios_flash.c
 SRC += $(PIOSCOMMON)/pios_heap.c
 SRC += $(PIOSCOMMON)/pios_semaphore.c
+SRC += $(PIOSCOMMON)/pios_sensors.c
+SRC += $(PIOSCOMMON)/pios_adc.c
 
 
 include ./UAVObjects.inc
