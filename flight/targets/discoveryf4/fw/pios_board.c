@@ -50,12 +50,12 @@
 #include "pios_lis3dsh.h"
 static const struct pios_exti_cfg pios_exti_lis3dsh_cfg __exti_config = {
 	.vector = PIOS_LIS3DSH_IRQHandler,
-	.line = EXTI_Line1,
+	.line = EXTI_Line0,
 	.pin = {
 		.gpio = GPIOE,
 		.init = {
-			.GPIO_Pin = GPIO_Pin_1,
-			.GPIO_Speed = GPIO_Speed_50MHz,
+			.GPIO_Pin = GPIO_Pin_0,
+			.GPIO_Speed = GPIO_Speed_100MHz,
 			.GPIO_Mode = GPIO_Mode_IN,
 			.GPIO_OType = GPIO_OType_OD,
 			.GPIO_PuPd = GPIO_PuPd_NOPULL,
@@ -63,7 +63,7 @@ static const struct pios_exti_cfg pios_exti_lis3dsh_cfg __exti_config = {
 	},
 	.irq = {
 		.init = {
-			.NVIC_IRQChannel = EXTI1_IRQn,
+			.NVIC_IRQChannel = EXTI0_IRQn,
 			.NVIC_IRQChannelPreemptionPriority = PIOS_IRQ_PRIO_HIGH,
 			.NVIC_IRQChannelSubPriority = 0,
 			.NVIC_IRQChannelCmd = ENABLE,
@@ -71,7 +71,7 @@ static const struct pios_exti_cfg pios_exti_lis3dsh_cfg __exti_config = {
 	},
 	.exti = {
 		.init = {
-			.EXTI_Line = EXTI_Line1, // matches above GPIO pin
+			.EXTI_Line = EXTI_Line0, // matches above GPIO pin
 			.EXTI_Mode = EXTI_Mode_Interrupt,
 			.EXTI_Trigger = EXTI_Trigger_Rising,
 			.EXTI_LineCmd = ENABLE,
@@ -387,7 +387,9 @@ void PIOS_Board_Init(void) {
 #if defined(PIOS_INCLUDE_LIS3DSH) && defined(PIOS_INCLUDE_SPI)
 	if (PIOS_LIS3DSH_Init(pios_spi_accel_id, 0, &pios_lis3dsh_cfg) != 0)
 		panic(2);
-	if (PIOS_LIS3DSH_Test() != 0)
+	int8_t test;
+	test = PIOS_LIS3DSH_Test();
+	if (test != 0)
 		panic(3);
 #endif
 

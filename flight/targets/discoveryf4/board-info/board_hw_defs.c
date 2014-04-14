@@ -117,7 +117,7 @@ void DMA1_Stream0_IRQHandler(void) __attribute__((alias("PIOS_SPI_accel_irq_hand
 void DMA1_Stream5_IRQHandler(void) __attribute__((alias("PIOS_SPI_accel_irq_handler")));
 static const struct pios_spi_cfg pios_spi_accel_cfg = {
 	.regs = SPI1,
-//	.remap = GPIO_AF_SPI2,
+	.remap = GPIO_AF_SPI1,
 	.init = {
 		.SPI_Mode              = SPI_Mode_Master,
 		.SPI_Direction         = SPI_Direction_2Lines_FullDuplex,
@@ -127,7 +127,7 @@ static const struct pios_spi_cfg pios_spi_accel_cfg = {
 		.SPI_CRCPolynomial     = 7,
 		.SPI_CPOL              = SPI_CPOL_High,
 		.SPI_CPHA              = SPI_CPHA_2Edge,
-		.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_4,	//168MHz / 4 == 42MHz
+		.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_32,	//168MHz / 4 == 42MHz
 	},
 	.use_crc = false,
 	.dma = {
@@ -195,7 +195,7 @@ static const struct pios_spi_cfg pios_spi_accel_cfg = {
 		.gpio = GPIOA,
 		.init = {
 			.GPIO_Pin = GPIO_Pin_6,
-			.GPIO_Speed = GPIO_Speed_50MHz,
+			.GPIO_Speed = GPIO_Speed_100MHz,
 			.GPIO_Mode = GPIO_Mode_AF,
 			.GPIO_OType = GPIO_OType_PP,
 			.GPIO_PuPd = GPIO_PuPd_NOPULL
@@ -206,7 +206,7 @@ static const struct pios_spi_cfg pios_spi_accel_cfg = {
 		.gpio = GPIOA,
 		.init = {
 			.GPIO_Pin = GPIO_Pin_7,
-			.GPIO_Speed = GPIO_Speed_50MHz,
+			.GPIO_Speed = GPIO_Speed_100MHz,
 			.GPIO_Mode = GPIO_Mode_AF,
 			.GPIO_OType = GPIO_OType_PP,
 			.GPIO_PuPd = GPIO_PuPd_NOPULL
@@ -217,8 +217,8 @@ static const struct pios_spi_cfg pios_spi_accel_cfg = {
 	.ssel = { {
 		.gpio = GPIOE,
 		.init = {
-			.GPIO_Pin = GPIO_Pin_2,
-			.GPIO_Speed = GPIO_Speed_50MHz,
+			.GPIO_Pin = GPIO_Pin_3,
+			.GPIO_Speed = GPIO_Speed_100MHz,
 			.GPIO_Mode  = GPIO_Mode_OUT,
 			.GPIO_OType = GPIO_OType_PP,
 			.GPIO_PuPd = GPIO_PuPd_UP
