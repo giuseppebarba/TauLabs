@@ -185,21 +185,24 @@ static void SensorsTask(void *parameters)
 		xQueueHandle queue;
 		queue = PIOS_SENSORS_GetQueue(PIOS_SENSOR_GYRO);
 		if(queue == NULL || xQueueReceive(queue, (void *) &gyros, SENSOR_PERIOD) == errQUEUE_EMPTY) {
-			good_runs = 0;
-			continue;
-		}
+			//good_runs = 0;
+			//continue;
+		} else
+			update_gyros(&gyros);
 
 		queue = PIOS_SENSORS_GetQueue(PIOS_SENSOR_ACCEL);
 		if(queue == NULL || xQueueReceive(queue, (void *) &accels, 0) == errQUEUE_EMPTY) {
 			//If no new accels data is ready, reuse the latest sample
 			AccelsSet(&accelsData);
+			good_runs = 0;
+			continue;
 		}
 		else
 			update_accels(&accels);
 
 		// Update gyros after the accels since the rest of the code expects
 		// the accels to be available first
-		update_gyros(&gyros);
+		//update_gyros(&gyros);
 
 		queue = PIOS_SENSORS_GetQueue(PIOS_SENSOR_MAG);
 		if(queue != NULL && xQueueReceive(queue, (void *) &mags, 0) != errQUEUE_EMPTY) {
