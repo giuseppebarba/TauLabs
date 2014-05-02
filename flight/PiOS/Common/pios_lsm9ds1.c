@@ -54,11 +54,11 @@ struct lsm9ds1_dev {
 	xQueueHandle mag_queue;
 	xTaskHandle TaskHandle;
 	xSemaphoreHandle data_ready_sema;
-	const struct pios_lsm9ds1_cfg * cfg;
+	const struct pios_lsm9ds1_cfg *cfg;
 	enum pios_lsm9ds1_dev_magic magic;
 };
 
 //! Global structure for this device device
-static struct mpu9150_dev * dev;
+static struct lsm9ds1_dev *dev;
 
 #endif
