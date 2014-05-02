@@ -135,6 +135,27 @@ enum pios_lsm9ds1_bw_xl {
 	LSM9DS1_XL_BW_50_HZ = 0x03,
 };
 
+#define LSM9DS1_CTRL_REG3_G_HP_EN	0x40
+
+enum pios_lsm9ds1_out_sel_g {
+	LSM9DS1_CTRL_REG2_G_OUT_SEL_LPF1 = 0x00,
+	LSM9DS1_CTRL_REG2_G_OUT_SEL_HPF = 0x01,
+	LSM9DS1_CTRL_REG2_G_OUT_SEL_LPF2 = 0x02
+};
+
+enum pios_lsm9ds1_hpf_g {
+	LSM9DS1_CTRL_REG3_G_HPCF_0 = 0x00,
+	LSM9DS1_CTRL_REG3_G_HPCF_1 = 0x01,
+	LSM9DS1_CTRL_REG3_G_HPCF_2 = 0x02,
+	LSM9DS1_CTRL_REG3_G_HPCF_3 = 0x03,
+	LSM9DS1_CTRL_REG3_G_HPCF_4 = 0x04,
+	LSM9DS1_CTRL_REG3_G_HPCF_5 = 0x05,
+	LSM9DS1_CTRL_REG3_G_HPCF_6 = 0x06,
+	LSM9DS1_CTRL_REG3_G_HPCF_0 = 0x07,
+	LSM9DS1_CTRL_REG3_G_HPCF_0 = 0x08,
+	LSM9DS1_CTRL_REG3_G_HPCF_0 = 0x09
+};
+
 enum pios_lsm9ds1_odr_m {
 	LSM9DS1_M_ODR_0_625_HZ = 0x00,
 	LSM9DS1_M_ODR_1_25_HZ = 0x04,
@@ -201,6 +222,10 @@ enum pios_lsm9ds1_int_cfg_m {
 	LSM9DS1_INT_CFG_M_IEA = 0x04,
 	LSM9DS1_INT_CFG_M_IEL = 0x02,
 	LSM9DS1_INT_CFG_M_IEN = 0x01
+};
+
+struct pios_lsm9ds1_cfg {
+	const struct pios_exti_cfg *exti_cfg; /* Pointer to the EXTI configuration */
 };
 
 #endif
