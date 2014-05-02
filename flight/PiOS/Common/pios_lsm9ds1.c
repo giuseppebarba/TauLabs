@@ -36,8 +36,9 @@
 #include "pios_lsm9ds1.h"
 
 /* Private constants */
-#define LSM9DS1_TASK_PRIORITY	(tskIDLE_PRIORITY + configMAX_PRIORITIES - 1)	// max priority
+#define LSM9DS1_TASK_PRIORITY		(tskIDLE_PRIORITY + configMAX_PRIORITIES - 1)
 #define LSM9DS1_TASK_STACK		(512 / 4)
+#define PIOS_LSM9DS1_MAX_DOWNSAMPLE	1
 
 /* Global Variables */
 enum pios_lsm9ds1_dev_magic {
@@ -47,8 +48,8 @@ enum pios_lsm9ds1_dev_magic {
 struct lsm9ds1_dev {
 	uint32_t spi_id;
 	uint32_t slave_num;
-	enum pios_mpu60x0_accel_range accel_range;
-	enum pios_mpu60x0_range gyro_range;
+	enum pios_lsm9ds1_fs_xl accel_range;
+	enum pios_lsm9ds1_fs_g gyro_range;
 	xQueueHandle gyro_queue;
 	xQueueHandle accel_queue;
 	xQueueHandle mag_queue;
@@ -60,5 +61,46 @@ struct lsm9ds1_dev {
 
 //! Global structure for this device device
 static struct lsm9ds1_dev *dev;
+
+static struct lsm9ds1_dev * PIOS_LSM9DS1_alloc(void);
+
+/**
+ * @brief Allocate a new device
+ */
+static struct lsm9ds1_dev * PIOS_LSM9DS1_alloc(void)
+{
+	struct lsm9ds1_dev * lsm9ds1_dev;
+
+	lsm9ds1_dev = (struct lsm9ds1_dev *)PIOS_malloc(sizeof(*lsm9ds1_dev));
+	if (!lsm9ds1_dev) return (NULL);
+
+	lsm9ds1_dev->magic = PIOS_LSM9DS1_DEV_MAGIC;
+
+	lsm9ds1_dev->accel_queue = xQueueCreate(PIOS_LSM9DS1_MAX_DOWNSAMPLE, sizeof(struct pios_sensor_gyro_data));
+	if (lsm9ds1_dev->accel_queue == NULL) {
+		vPortFree(lsm9ds1_dev);
+		return NULL;
+	}
+
+	lsm9ds1_dev->gyro_queue = xQueueCreate(PIOS_LSM9DS1_MAX_DOWNSAMPLE, sizeof(struct pios_sensor_gyro_data));
+	if (lsm9ds1_dev->gyro_queue == NULL) {
+		vPortFree(lsm9ds1_dev);
+		return NULL;
+	}
+
+	lsm9ds1_dev->mag_queue = xQueueCreate(PIOS_LSM9DS1_MAX_DOWNSAMPLE, sizeof(struct pios_sensor_mag_data));
+	if (lsm9ds1_dev->mag_queue == NULL) {
+		vPortFree(lsm9ds1_dev);
+		return NULL;
+	}
+
+	lsm9ds1_dev->data_ready_sema = xSemaphoreCreateMutex();
+	if (lsm9ds1_dev->data_ready_sema == NULL) {
+		vPortFree(lsm9ds1_dev);
+		return NULL;
+	}
+
+	return(lsm9ds1_dev);
+}
 
 #endif
