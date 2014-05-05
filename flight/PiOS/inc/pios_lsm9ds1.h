@@ -98,7 +98,8 @@
 #define LSM9DS1_INT_THS_H_M				0x33
 
 enum pios_lsm9ds1_odr_g {
-	LSM9DS1_G_ODR_OFF = 0x00 LSM9DS1_G_ODR_14_9_HZ = 0x20,
+	LSM9DS1_G_ODR_OFF = 0x00,
+	LSM9DS1_G_ODR_14_9_HZ = 0x20,
 	LSM9DS1_G_ODR_59_5_HZ = 0x40,
 	LSM9DS1_G_ODR_119_HZ = 0x60,
 	LSM9DS1_G_ODR_238_HZ = 0x80,
@@ -151,9 +152,9 @@ enum pios_lsm9ds1_hpf_g {
 	LSM9DS1_CTRL_REG3_G_HPCF_4 = 0x04,
 	LSM9DS1_CTRL_REG3_G_HPCF_5 = 0x05,
 	LSM9DS1_CTRL_REG3_G_HPCF_6 = 0x06,
-	LSM9DS1_CTRL_REG3_G_HPCF_0 = 0x07,
-	LSM9DS1_CTRL_REG3_G_HPCF_0 = 0x08,
-	LSM9DS1_CTRL_REG3_G_HPCF_0 = 0x09
+	LSM9DS1_CTRL_REG3_G_HPCF_7 = 0x07,
+	LSM9DS1_CTRL_REG3_G_HPCF_8 = 0x08,
+	LSM9DS1_CTRL_REG3_G_HPCF_9 = 0x09
 };
 
 enum pios_lsm9ds1_odr_m {
@@ -165,6 +166,19 @@ enum pios_lsm9ds1_odr_m {
 	LSM9DS1_M_ODR_20_HZ = 0x14,
 	LSM9DS1_M_ODR_40_HZ = 0x18,
 	LSM9DS1_M_ODR_80_HZ = 0x1C
+};
+
+enum pios_lsm9ds1_int1 {
+	LSM9DS1_INT1_IG_G = 0x80,
+	LSM9DS1_INT1_IG_XL = 0x40,
+	LSM9DS1_INT1_DRDY_G = 0x02,
+	LSM9DS1_INT1_DRDY_XL = 0x01
+};
+
+enum pios_lsm9ds1_int2 {
+	LSM9DS1_INT2_DRDY_TEMP = 0x04,
+	LSM9DS1_INT2_DRDY_G = 0x02,
+	LSM9DS1_INT2_DRDY_XL = 0x01
 };
 
 enum pios_lsm9ds1_op_mode_m {
@@ -186,19 +200,6 @@ enum pios_lsm9ds1_ctrl_reg1 {
 	LSM9DS1_CTRL_REG4_YEN_G = 0x10,
 	LSM9DS1_CTRL_REG4_XEN_G = 0x08,
 	LSM9DS1_CTRL_REG4_LIR_XL1 = 0x02
-};
-
-enum pios_lsm9ds1_int1 {
-	LSM9DS1_INT1_IG_G = 0x80,
-	LSM9DS1_INT1_IG_XL = 0x40,
-	LSM9DS1_INT1_DRDY_G = 0x02,
-	LSM9DS1_INT1_DRDY_XL = 0x01
-};
-
-enum pios_lsm9ds1_int2 {
-	LSM9DS1_INT2_DRDY_TEMP = 0x04,
-	LSM9DS1_INT2_DRDY_G = 0x02,
-	LSM9DS1_INT2_DRDY_XL = 0x01
 };
 
 enum pios_lsm9ds1_ctrl_reg5 {
@@ -224,8 +225,26 @@ enum pios_lsm9ds1_int_cfg_m {
 	LSM9DS1_INT_CFG_M_IEN = 0x01
 };
 
+enum pios_lsm9ds1_status_reg_m {
+	LSM9DS1_STATUS_REG_M_XDA = 0x01,
+	LSM9DS1_STATUS_REG_M_YDA = 0x02,
+	LSM9DS1_STATUS_REG_M_ZDA = 0x04,
+	LSM9DS1_STATUS_REG_M_ZYXDA = 0x08
+};
+
 struct pios_lsm9ds1_cfg {
-	const struct pios_exti_cfg *exti_cfg; /* Pointer to the EXTI configuration */
+	const struct pios_exti_cfg *exti_cfg;	/* Pointer to the EXTI configuration */
+
+	uint8_t i2c_addr_ax_g; /** I2C address for Acc and Gyro */
+	uint8_t i2c_addr_mag; /** I2C address for Mag */
+
+	enum pios_lsm9ds1_fs_xl accel_fs;
+	enum pios_lsm9ds1_fs_g gyro_fs;
+	enum pios_lsm9ds1_fs_m mag_fs;
+
+	enum pios_lsm9ds1_odr_xl accel_odr;
+	enum pios_lsm9ds1_odr_g gyro_odr;
+	enum pios_lsm9ds1_odr_m mag_odr;
 };
 
 #endif
