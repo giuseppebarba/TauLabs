@@ -5,26 +5,26 @@
  * @addtogroup DiscoveryF4 DiscoveryF4 support files
  * @{
  *
- * @file       board_hw_defs.c 
+ * @file       board_hw_defs.c
  * @author     Tau Labs, http://taulabs.org, Copyright (C) 2012-2013
  * @brief      Defines board specific static initializers for hardware for the
  *             DiscoveryF4 board.
  * @see        The GNU Public License (GPL) Version 3
- * 
+ *
  *****************************************************************************/
-/* 
- * This program is free software; you can redistribute it and/or modify 
- * it under the terms of the GNU General Public License as published by 
- * the Free Software Foundation; either version 3 of the License, or 
+/*
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful, but 
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License 
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
- * 
- * You should have received a copy of the GNU General Public License along 
- * with this program; if not, write to the Free Software Foundation, Inc., 
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 #include <pios_config.h>
@@ -141,7 +141,7 @@ static const struct pios_spi_cfg pios_spi_accel_cfg = {
 				.NVIC_IRQChannelCmd = ENABLE,
 			},
 		},
-		
+
 		.rx = {
 			.channel = DMA1_Stream0,
 			.init = {
@@ -370,6 +370,84 @@ const struct pios_flash_partition * PIOS_BOARD_HW_DEFS_GetPartitionTable (uint32
 #if defined(PIOS_INCLUDE_I2C)
 
 #include <pios_i2c_priv.h>
+
+/*
+ * I2C Adapters
+ */
+
+void PIOS_I2C_external_ev_irq_handler(void);
+void PIOS_I2C_external_er_irq_handler(void);
+void I2C3_EV_IRQHandler() __attribute__ ((alias ("PIOS_I2C_external_ev_irq_handler")));
+void I2C3_ER_IRQHandler() __attribute__ ((alias ("PIOS_I2C_external_er_irq_handler")));
+
+static const struct pios_i2c_adapter_cfg pios_i2c_external_adapter_cfg = {
+  .regs = I2C1,
+  .remap = GPIO_AF_I2C1,
+  .init = {
+    .I2C_Mode                = I2C_Mode_I2C,
+    .I2C_OwnAddress1         = 0,
+    .I2C_Ack                 = I2C_Ack_Enable,
+    .I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit,
+    .I2C_DutyCycle           = I2C_DutyCycle_2,
+    .I2C_ClockSpeed          = 400000,
+  },
+  .transfer_timeout_ms = 50,
+  .scl = {
+    .gpio = GPIOB,
+    .init = {
+      .GPIO_Pin = GPIO_Pin_6,
+      .GPIO_Mode  = GPIO_Mode_AF,
+      .GPIO_Speed = GPIO_Speed_50MHz,
+      .GPIO_OType = GPIO_OType_OD,
+      .GPIO_PuPd  = GPIO_PuPd_NOPULL,
+    },
+    .pin_source = GPIO_PinSource8,
+  },
+  .sda = {
+    .gpio = GPIOB,
+    .init = {
+      .GPIO_Pin = GPIO_Pin_7,
+      .GPIO_Mode  = GPIO_Mode_AF,
+      .GPIO_Speed = GPIO_Speed_50MHz,
+      .GPIO_OType = GPIO_OType_OD,
+      .GPIO_PuPd  = GPIO_PuPd_NOPULL,
+    },
+    .pin_source = GPIO_PinSource9,
+  },
+  .event = {
+    .flags   = 0,
+    .init = {
+      .NVIC_IRQChannel = I2C1_EV_IRQn,
+      .NVIC_IRQChannelPreemptionPriority = PIOS_IRQ_PRIO_HIGHEST,
+      .NVIC_IRQChannelSubPriority = 0,
+      .NVIC_IRQChannelCmd = ENABLE,
+    },
+  },
+  .error = {
+    .flags   = 0,
+    .init = {
+      .NVIC_IRQChannel = I2C1_ER_IRQn,
+      .NVIC_IRQChannelPreemptionPriority = PIOS_IRQ_PRIO_HIGHEST,
+      .NVIC_IRQChannelSubPriority = 0,
+      .NVIC_IRQChannelCmd = ENABLE,
+    },
+  },
+};
+
+uint32_t pios_i2c_external_adapter_id;
+void PIOS_I2C_external_ev_irq_handler(void)
+{
+  /* Call into the generic code to handle the IRQ for this specific device */
+  PIOS_I2C_EV_IRQ_Handler(pios_i2c_external_adapter_id);
+}
+
+void PIOS_I2C_external_er_irq_handler(void)
+{
+  /* Call into the generic code to handle the IRQ for this specific device */
+  PIOS_I2C_ER_IRQ_Handler(pios_i2c_external_adapter_id);
+}
+
+
 
 #endif /* PIOS_INCLUDE_I2C */
 

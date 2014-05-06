@@ -2,9 +2,9 @@
 # @file       Makefile
 # @author     The OpenPilot Team, http://www.openpilot.org, Copyright (C) 2009.
 # @author     Tau Labs, http://taulabs.org, Copyright (C) 2012-2013
-# @addtogroup 
+# @addtogroup
 # @{
-# @addtogroup 
+# @addtogroup
 # @{
 # @brief Makefile to build firmware for discoveryF4 eval board.
 ###############################################################################
@@ -32,7 +32,7 @@ include $(BOARD_INFO_DIR)/board-info.mk
 DEBUG ?= NO
 
 # List of modules to include
-MODULES += FirmwareIAP 
+MODULES += FirmwareIAP
 MODULES += Telemetry
 
 
@@ -55,7 +55,7 @@ DEBUG_CM3_DIR = $(PIOSCOMMONLIB)/Debug
 DEBUG_CM3_DIR_INC = $(DEBUG_CM3_DIR)/inc
 OPUAVOBJINC = $(OPUAVOBJ)/inc
 
-SRC = 
+SRC =
 # optional component libraries
 include $(PIOSCOMMONLIB)/FreeRTOS/library.mk
 include $(FLIGHTLIB)/CMSIS3/DSP_Lib/library.mk
@@ -101,6 +101,7 @@ SRC += $(PIOSCOMMON)/pios_usb_util.c
 SRC += $(PIOSCOMMON)/pios_flash.c
 SRC += $(PIOSCOMMON)/pios_heap.c
 SRC += $(PIOSCOMMON)/pios_semaphore.c
+SRC += $(PIOSCOMMON)/pios_lsm9ds1.c
 
 
 include ./UAVObjects.inc
@@ -260,7 +261,7 @@ LDFLAGS += -lc -lgcc -lm
 LDFLAGS += -Wl,--warn-common
 LDFLAGS += -Wl,--fatal-warnings
 
-#Linker scripts                                                                                                                                                                                                              
+#Linker scripts
 LDFLAGS += $(addprefix -T,$(LINKER_SCRIPTS_APP))
 
 

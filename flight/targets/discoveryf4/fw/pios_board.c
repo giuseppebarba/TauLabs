@@ -9,28 +9,28 @@
  * @author     Tau Labs, http://taulabs.org, Copyright (C) 2012-2013
  * @brief      The board specific initialization routines
  * @see        The GNU Public License (GPL) Version 3
- * 
+ *
  *****************************************************************************/
-/* 
- * This program is free software; you can redistribute it and/or modify 
- * it under the terms of the GNU General Public License as published by 
- * the Free Software Foundation; either version 3 of the License, or 
+/*
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful, but 
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
- * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License 
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
  * for more details.
- * 
- * You should have received a copy of the GNU General Public License along 
- * with this program; if not, write to the Free Software Foundation, Inc., 
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
 /* Pull in the board-specific static HW definitions.
  * Including .c files is a bit ugly but this allows all of
  * the HW definitions to be const and static to limit their
- * scope.  
+ * scope.
  *
  * NOTE: THIS IS THE ONLY PLACE THAT SHOULD EVER INCLUDE THIS FILE
  */
@@ -68,6 +68,52 @@ uintptr_t pios_com_telem_usb_id;
 uintptr_t pios_com_vcp_id;
 
 uintptr_t pios_uavo_settings_fs_id;
+
+#if defined(PIOS_INCLUDE_LSM9DS1)
+#include "pios_lsm9ds1.h"
+static const struct pios_exti_cfg pios_exti_lsm9ds1_cfg __exti_config = {
+	.vector = PIOS_LSM9DS1_IRQHandler,
+	.line = EXTI_Line15,
+	.pin = {
+		.gpio = GPIOA,
+		.init = {
+			.GPIO_Pin = GPIO_Pin_15,
+			.GPIO_Speed = GPIO_Speed_50MHz,
+			.GPIO_Mode = GPIO_Mode_IN,
+			.GPIO_OType = GPIO_OType_OD,
+			.GPIO_PuPd = GPIO_PuPd_NOPULL,
+		},
+	},
+	.irq = {
+		.init = {
+			.NVIC_IRQChannel = EXTI15_10_IRQn,
+			.NVIC_IRQChannelPreemptionPriority = PIOS_IRQ_PRIO_MID,
+			.NVIC_IRQChannelSubPriority = 0,
+			.NVIC_IRQChannelCmd = ENABLE,
+		},
+	},
+	.exti = {
+		.init = {
+			.EXTI_Line = EXTI_Line15,
+			.EXTI_Mode = EXTI_Mode_Interrupt,
+			.EXTI_Trigger = EXTI_Trigger_Rising,
+			.EXTI_LineCmd = ENABLE,
+		},
+	},
+};
+
+static const struct pios_lsm9ds1_cfg lsm9ds1_cfg = {
+	.exti_cfg = &pios_exti_lsm9ds1_cfg,
+	.i2c_addr_ax_g = LSM9DS1_I2C_ADDR_L,
+	.i2c_addr_mag = LSM9DS1_I2C_MAG_ADDR_L,
+	.accel_fs = LSM9DS1_XL_FS_8_G,
+	.gyro_fs = LSM9DS1_G_FS_2000_DPS,
+	.mag_fs = LSM9DS1_M_FS_12_G,
+	.accel_odr = LSM9DS1_XL_ODR_476_HZ,
+	.gyro_odr = LSM9DS1_G_ODR_476_HZ,
+	.mag_odr = LSM9DS1_M_ODR_80_HZ
+};
+#endif /* PIOS_INCLUDE_MPU9150 */
 
 /*
  * Setup a com port based on the passed cfg, driver and buffer sizes. rx or tx size of 0 disables rx or tx
@@ -326,11 +372,11 @@ void PIOS_Board_Init(void) {
 	}
 
 #endif	/* PIOS_INCLUDE_USB_HID */
-	
+
 	if (usb_hid_present || usb_cdc_present) {
 		PIOS_USBHOOK_Activate();
 	}
-	
+
 #endif	/* PIOS_INCLUDE_USB */
 
 
@@ -363,6 +409,18 @@ void PIOS_Board_Init(void) {
 	}
 	pios_rcvr_group_map[MANUALCONTROLSETTINGS_CHANNELGROUPS_GCS] = pios_gcsrcvr_rcvr_id;
 #endif	/* PIOS_INCLUDE_GCSRCVR */
+
+#if defined(PIOS_INCLUDE_LSM9DS1)
+	if (PIOS_LSM9DS1_Probe(pios_i2c_external_adapter_id, lsm9ds1_cfg.i2c_addr_ax_g) == LSM9DS1_WHO_AM_I_VAL) {
+		int retval;
+		retval = PIOS_LSM9DS1_Init(pios_i2c_external_adapter_id, &lsm9ds1_cfg);
+		if (retval == -10)
+			panic(1); // indicate missing IRQ separately
+		if (retval != 0)
+			panic(2);
+	} else
+		panic(3);
+#endif
 
 #if defined(PIOS_INCLUDE_GPIO)
 	PIOS_GPIO_Init();
