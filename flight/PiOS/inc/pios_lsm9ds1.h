@@ -253,6 +253,12 @@ struct pios_lsm9ds1_cfg {
 };
 
 uint8_t PIOS_LSM9DS1_Probe(uint32_t i2c_id, uint8_t i2c_addr);
+int32_t PIOS_LSM9DS1_SetGyroRange(enum pios_lsm9ds1_fs_g gyro_fs);
+int32_t PIOS_LSM9DS1_SetAccRange(enum pios_lsm9ds1_fs_xl accel_fs);
+int32_t PIOS_LSM9DS1_SetMagRange(enum pios_lsm9ds1_fs_m mag_fs);
+int32_t PIOS_LSM9DS1_SetGyroODR(enum pios_lsm9ds1_odr_g odr);
+int32_t PIOS_LSM9DS1_SetAccODR(enum pios_lsm9ds1_odr_xl odr);
+int32_t PIOS_LSM9DS1_SetMagODR(enum pios_lsm9ds1_odr_m odr);
 bool PIOS_LSM9DS1_IRQHandler(void);
 int32_t PIOS_LSM9DS1_Init(uint32_t i2c_id, const struct pios_lsm9ds1_cfg * cfg);
 #endif
