@@ -67,13 +67,14 @@ struct lsm9ds1_dev {
 	xSemaphoreHandle data_ready_sema;
 	const struct pios_lsm9ds1_cfg *cfg;
 	enum pios_lsm9ds1_dev_magic magic;
+
+	float accel_odr_hz;
+	float gyro_odr_hz;
+	float mag_odr_hz;
 };
 
 //! Global structure for this device device
 static struct lsm9ds1_dev *dev;
-
-static struct lsm9ds1_dev *PIOS_LSM9DS1_alloc(void);
-static int32_t PIOS_LSM9DS1_Write_AxG(uint8_t address, uint8_t buffer);
 
 /**
  * @brief Writes one or more bytes to Acc and Gyr of the LSM9DS1
@@ -98,8 +99,7 @@ static int32_t PIOS_LSM9DS1_Write_i2c(uint8_t i2c_addr, uint8_t address,
 		 .rw = PIOS_I2C_TXN_WRITE,
 		 .len = sizeof(data),
 		 .buf = data,
-		 }
-		,
+		 },
 	};
 
 	return PIOS_I2C_Transfer(dev->i2c_id, txn_list, NELEMENTS(txn_list));
@@ -153,7 +153,7 @@ static int32_t PIOS_LSM9DS1_Read_I2C(uint8_t i2c_addr, uint8_t address,
 static int32_t PIOS_LSM9DS1_SetReg_AxG(uint8_t reg, uint8_t data)
 {
 #if !defined(LSM9DS1_USE_SPI)
-	return PIOS_LSM9DS1_Write(dev->i2c_addr_ax_g, reg, data);
+	return PIOS_LSM9DS1_Write_i2c(dev->i2c_addr_ax_g, reg, data);
 #endif
 }
 
@@ -168,7 +168,7 @@ static int32_t PIOS_LSM9DS1_SetReg_AxG(uint8_t reg, uint8_t data)
 static int32_t PIOS_LSM9DS1_SetReg_Mag(uint8_t reg, uint8_t data)
 {
 #if !defined(LSM9DS1_USE_SPI)
-	return PIOS_LSM9DS1_Write(dev->i2c_addr_mag, reg, data);
+	return PIOS_LSM9DS1_Write_i2c(dev->i2c_addr_mag, reg, data);
 #endif
 }
 
@@ -180,14 +180,13 @@ static int32_t PIOS_LSM9DS1_SetReg_Mag(uint8_t reg, uint8_t data)
 static int32_t PIOS_MPU9150_GetReg_AxG(uint8_t reg)
 {
 	uint8_t data;
-	int32_t retval;
+	int32_t ret = -1;
 
 #if !defined(LSM9DS1_USE_SPI)
-	retval =
-	    PIOS_LSM9DS1_Read_I2C(dev->i2c_addr_ax_g, reg, &data, sizeof(data));
+	ret = PIOS_LSM9DS1_Read_I2C(dev->i2c_addr_ax_g, reg, &data, sizeof(data));
 #endif
-	if (retval != 0)
-		return retval;
+	if (ret != 0)
+		return ret;
 	else
 		return data;
 }
@@ -197,7 +196,11 @@ static int32_t PIOS_MPU9150_GetReg_AxG(uint8_t reg)
  */
 int32_t PIOS_LSM9DS1_SetGyroRange(enum pios_lsm9ds1_fs_g gyro_fs)
 {
-	PIOS_LSM9DS1_SetReg_AxG(LSM9DS1_CTRL_REG1_G, gyro_fs);
+	int32_t ret = -1;
+
+	ret = PIOS_LSM9DS1_SetReg_AxG(LSM9DS1_CTRL_REG1_G, gyro_fs);
+	if (ret < 0)
+		return ret;
 
 	switch (gyro_fs) {
 	case LSM9DS1_G_FS_245_DPS:
@@ -220,7 +223,12 @@ int32_t PIOS_LSM9DS1_SetGyroRange(enum pios_lsm9ds1_fs_g gyro_fs)
  */
 int32_t PIOS_LSM9DS1_SetAccRange(enum pios_lsm9ds1_fs_xl accel_fs)
 {
-	PIOS_LSM9DS1_SetReg_AxG(LSM9DS1_CTRL_REG6_XL, accel_fs);
+	int32_t ret = -1;
+
+	ret = PIOS_LSM9DS1_SetReg_AxG(LSM9DS1_CTRL_REG6_XL, accel_fs);
+	if (ret < 0)
+		return ret;
+
 	dev->accel_fs = accel_fs;
 	return 0;
 }
@@ -230,7 +238,12 @@ int32_t PIOS_LSM9DS1_SetAccRange(enum pios_lsm9ds1_fs_xl accel_fs)
  */
 int32_t PIOS_LSM9DS1_SetMagRange(enum pios_lsm9ds1_fs_m mag_fs)
 {
-	PIOS_LSM9DS1_SetReg_Mag(LSM9DS1_CTRL_REG2_M, mag_fs);
+	int32_t ret = -1;
+
+	ret = PIOS_LSM9DS1_SetReg_Mag(LSM9DS1_CTRL_REG2_M, mag_fs);
+	if (ret < 0)
+		return ret;
+
 	dev->mag_fs = mag_fs;
 	return 0;
 }
@@ -240,7 +253,36 @@ int32_t PIOS_LSM9DS1_SetMagRange(enum pios_lsm9ds1_fs_m mag_fs)
  */
 int32_t PIOS_LSM9DS1_SetGyroODR(enum pios_lsm9ds1_odr_g odr)
 {
-	return PIOS_LSM9DS1_SetReg_AxG(LSM9DS1_CTRL_REG1_G, odr);
+	int32_t ret = -1;
+	ret = PIOS_LSM9DS1_SetReg_AxG(LSM9DS1_CTRL_REG1_G, odr);
+	if (ret < 0)
+		return ret;
+
+	switch(odr) {
+		case LSM9DS1_G_ODR_14_9_HZ:
+			dev->gyro_odr_hz = 14.9f;
+			break;
+		case LSM9DS1_G_ODR_59_5_HZ:
+			dev->gyro_odr_hz = 59.5f;
+			break;
+		case LSM9DS1_G_ODR_119_HZ:
+			dev->gyro_odr_hz = 119.0f;
+			break;
+		case LSM9DS1_G_ODR_238_HZ:
+			dev->gyro_odr_hz = 238.0f;
+			break;
+		case LSM9DS1_G_ODR_476_HZ:
+			dev->gyro_odr_hz = 476.0f;
+			break;
+		case LSM9DS1_G_ODR_952_HZ:
+			dev->gyro_odr_hz = 952.0f;
+			break;
+		default:
+		case LSM9DS1_G_ODR_OFF:
+			dev->gyro_odr_hz = 0.0f;
+			break;
+	}
+	return 0;
 }
 
 /**
@@ -248,7 +290,36 @@ int32_t PIOS_LSM9DS1_SetGyroODR(enum pios_lsm9ds1_odr_g odr)
  */
 int32_t PIOS_LSM9DS1_SetAccODR(enum pios_lsm9ds1_odr_xl odr)
 {
-	return PIOS_LSM9DS1_SetReg_AxG(LSM9DS1_CTRL_REG6_XL, odr);
+	int32_t ret = -1;
+	ret = PIOS_LSM9DS1_SetReg_AxG(LSM9DS1_CTRL_REG6_XL, odr);
+	if (ret < 0)
+		return ret;
+
+	switch(odr) {
+		case LSM9DS1_XL_ODR_10_HZ:
+			dev->gyro_odr_hz = 10.0f;
+			break;
+		case LSM9DS1_XL_ODR_50_HZ:
+			dev->gyro_odr_hz = 50.0f;
+			break;
+		case LSM9DS1_XL_ODR_119_HZ:
+			dev->gyro_odr_hz = 119.0f;
+			break;
+		case LSM9DS1_XL_ODR_238_HZ:
+			dev->gyro_odr_hz = 238.0f;
+			break;
+		case LSM9DS1_XL_ODR_476_HZ:
+			dev->gyro_odr_hz = 476.0f;
+			break;
+		case LSM9DS1_XL_ODR_952_HZ:
+			dev->gyro_odr_hz = 952.0f;
+			break;
+		default:
+		case LSM9DS1_XL_ODR_OFF:
+			dev->gyro_odr_hz = 0.0f;
+			break;
+	}
+	return 0;
 }
 
 /**
@@ -256,7 +327,41 @@ int32_t PIOS_LSM9DS1_SetAccODR(enum pios_lsm9ds1_odr_xl odr)
  */
 int32_t PIOS_LSM9DS1_SetMagODR(enum pios_lsm9ds1_odr_m odr)
 {
-	return PIOS_LSM9DS1_SetReg_Mag(LSM9DS1_CTRL_REG1_M, odr);
+	int32_t ret = -1;
+	ret = PIOS_LSM9DS1_SetReg_Mag(LSM9DS1_CTRL_REG1_M, odr);
+	if (ret < 0)
+		return ret;
+
+	switch(odr) {
+		case LSM9DS1_M_ODR_0_625_HZ:
+			dev->mag_odr_hz = 0.625f;
+			break;
+		case LSM9DS1_M_ODR_1_25_HZ:
+			dev->mag_odr_hz = 1.25f;
+			break;
+		case LSM9DS1_M_ODR_2_5_HZ:
+			dev->mag_odr_hz = 2.5f;
+			break;
+		case LSM9DS1_M_ODR_5_HZ:
+			dev->mag_odr_hz = 5.0f;
+			break;
+		case LSM9DS1_M_ODR_10_HZ:
+			dev->mag_odr_hz = 10.0f;
+			break;
+		case LSM9DS1_M_ODR_20_HZ:
+			dev->mag_odr_hz = 20.0f;
+			break;
+		case LSM9DS1_M_ODR_40_HZ:
+			dev->mag_odr_hz = 40.0f;
+			break;
+		case LSM9DS1_M_ODR_80_HZ:
+			dev->mag_odr_hz = 80.0f;
+			break;
+		default:
+			dev->mag_odr_hz = 0.0f;
+			break;
+	}
+	return 0;
 }
 
 /**
@@ -326,6 +431,24 @@ static int32_t PIOS_LSM9DS1_Validate(struct lsm9ds1_dev *dev)
 }
 
 /**
+ * @brief Configure the interrupt source
+ * \return 0 for valid transaction, negative value for i2c error
+*
+*/
+static int32_t PIOS_LSM9DS1_SetIntSource()
+{
+	/**
+	 * Use the higher speed sensor as interrupt source
+	 */
+	if (dev->gyro_odr_hz >= dev->accel_odr_hz)
+		return PIOS_LSM9DS1_SetReg_AxG(LSM9DS1_INT1_CTRL,
+				LSM9DS1_INT1_IG_G | LSM9DS1_INT1_DRDY_G);
+	else
+		return PIOS_LSM9DS1_SetReg_AxG(LSM9DS1_INT1_CTRL,
+				LSM9DS1_INT1_IG_XL | LSM9DS1_INT1_DRDY_XL);
+}
+
+/**
  * @brief Initialize the LSM9DS1 sensor
  * \return none
  * \param[in] PIOS_LSM9DS1_ConfigTypeDef struct to be used to configure sensor.
@@ -344,11 +467,8 @@ static int32_t PIOS_LSM9DS1_Config(struct pios_lsm9ds1_cfg const *cfg)
 
 	/**
 	 * Interrupt configuration
-	 * Use Gyroscope as interrupt source
-	 *
 	 */
-	PIOS_LSM9DS1_SetReg_AxG(cfg, LSM9DS1_INT1_CTRL,
-				LSM9DS1_INT1_IG_G | LSM9DS1_INT1_DRDY_G);
+	PIOS_LSM9DS1_SetIntSource(cfg);
 
 	return 0;
 }
@@ -368,6 +488,9 @@ int32_t PIOS_LSM9DS1_Init(uint32_t i2c_id, const struct pios_lsm9ds1_cfg * cfg)
 	dev->i2c_addr_ax_g = cfg->i2c_addr_ax_g;
 	dev->i2c_addr_mag = cfg->i2c_add_mag;
 	dev->cfg = cfg;
+	dev->gyro_odr_hz = 0.0f;
+	dev->accel_odr_hz = 0.0f;
+	dev->mag_odr_hz = 0.0f;
 
 	/* Configure Sensors */
 	if (PIOS_LSM9DS1_Config(cfg) != 0)
@@ -459,7 +582,7 @@ static float PIOS_LSM9DS1_GetMagScale()
  */
 uint8_t PIOS_LSM9DS1_Probe(uint32_t i2c_id, uint8_t i2c_addr)
 {
-	int32_t retval
+	int32_t retval = -1;
 #if !defined(LSM9DS1_USE_SPI)
 	uint8_t read = 0;
 	uint8_t addr = LSM9DS1_WHO_AM_I;
