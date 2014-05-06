@@ -28,6 +28,12 @@
 
 #include "discoveryf4.h"
 
+#include <uavobjectmanager.h>
+#include "uavobjectutil/uavobjectutilmanager.h"
+#include <extensionsystem/pluginmanager.h>
+
+#include "hwdiscoveryf4.h"
+
 /**
  * @brief DiscoveryF4::DiscoveryF4
  *  This is the DiscoveryF4 board definition
@@ -42,6 +48,11 @@ DiscoveryF4::DiscoveryF4(void)
     setUSBInfo(board);
 
     boardType = 0x85;
+
+    // Define the bank of channels that are connected to a given timer
+    channelBanks.resize(6);
+    channelBanks[0] = QVector<int> () << 1 << 2 << 3 << 4;
+    channelBanks[1] = QVector<int> () << 5 << 6 << 7 << 8;
 }
 
 DiscoveryF4::~DiscoveryF4()
@@ -64,11 +75,11 @@ bool DiscoveryF4::queryCapabilities(BoardCapabilities capability)
 {
     switch(capability) {
     case BOARD_CAPABILITIES_GYROS:
-        return false;
+        return true;
     case BOARD_CAPABILITIES_ACCELS:
-        return false;
+        return true;
     case BOARD_CAPABILITIES_MAGS:
-        return false;
+        return true;
     case BOARD_CAPABILITIES_BAROS:
         return false;
     case BOARD_CAPABILITIES_RADIO:
@@ -96,4 +107,27 @@ QPixmap DiscoveryF4::getBoardPicture()
 QString DiscoveryF4::getHwUAVO()
 {
     return "HwDiscoveryF4";
+}
+
+int DiscoveryF4::queryMaxGyroRate()
+{
+    ExtensionSystem::PluginManager *pm = ExtensionSystem::PluginManager::instance();
+    UAVObjectManager *uavoManager = pm->getObject<UAVObjectManager>();
+    HwDiscoveryF4 *hwDiscoveryF4 = HwDiscoveryF4::GetInstance(uavoManager);
+    Q_ASSERT(hwDiscoveryF4);
+    if (!hwDiscoveryF4)
+        return 0;
+
+    HwDiscoveryF4::DataFields settings = hwDiscoveryF4->getData();
+
+    switch(settings.GyroRange) {
+    case HwDiscoveryF4::GYRORANGE_245:
+        return 250;
+    case HwDiscoveryF4::GYRORANGE_500:
+        return 500;
+    case HwDiscoveryF4::GYRORANGE_2000:
+        return 2000;
+    default:
+        return 500;
+    }
 }
