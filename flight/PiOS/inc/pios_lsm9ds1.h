@@ -18,6 +18,11 @@
 * Registers address definition
 */
 
+#define LSM9DS1_I2C_AX_G_ADDR_L				0x6A
+#define LSM9DS1_I2C_AX_G_ADDR_H				0x6B
+#define LSM9DS1_I2C_MAG_ADDR_L					0x1C
+#define LSM9DS1_I2C_MAG_ADDR_H					0x1E
+
 /** Accelerometer and gyroscope registers */
 #define LSM9DS1_ACT_THS					0x04
 #define LSM9DS1_ACT_DUR					0x05
@@ -247,4 +252,7 @@ struct pios_lsm9ds1_cfg {
 	enum pios_lsm9ds1_odr_m mag_odr;
 };
 
+uint8_t PIOS_LSM9DS1_Probe(uint32_t i2c_id, uint8_t i2c_addr);
+bool PIOS_LSM9DS1_IRQHandler(void);
+int32_t PIOS_LSM9DS1_Init(uint32_t i2c_id, const struct pios_lsm9ds1_cfg * cfg);
 #endif
