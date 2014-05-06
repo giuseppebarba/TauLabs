@@ -453,6 +453,43 @@ static float PIOS_LSM9DS1_GetMagScale()
 }
 
 /**
+ * Check if an MPU9150 is detected at the requested address
+ * @return 0 if detected, -1 if successfully probed but wrong id
+ *  -2 no device at address
+ */
+uint8_t PIOS_LSM9DS1_Probe(uint32_t i2c_id, uint8_t i2c_addr)
+{
+	int32_t retval
+#if !defined(LSM9DS1_USE_SPI)
+	uint8_t read = 0;
+	uint8_t addr = LSM9DS1_WHO_AM_I;
+
+	const struct pios_i2c_txn txn_list[] = {
+		{
+			.info = __func__,
+			.addr = i2c_addr,
+			.rw = PIOS_I2C_TXN_WRITE,
+			.len = 1,
+			.buf = &addr,
+		},
+		{
+			.info = __func__,
+			.addr = i2c_addr,
+			.rw = PIOS_I2C_TXN_READ,
+			.len = 1,
+			.buf = &read,
+		}
+	};
+
+	retval = PIOS_I2C_Transfer(i2c_id, txn_list, NELEMENTS(txn_list));
+#endif
+	if (retval < 0)
+		return -1;
+
+	return read;
+}
+
+/**
 * @brief IRQ Handler.  Read all the data from onboard buffer
 */
 bool PIOS_LSM9DS1_IRQHandler(void)
