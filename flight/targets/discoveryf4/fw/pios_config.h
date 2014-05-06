@@ -5,11 +5,11 @@
  * @addtogroup DiscoveryF4 DiscoveryF4 support files
  * @{
  *
- * @file       pios_config.h 
+ * @file       pios_config.h
  * @author     Tau Labs, http://taulabs.org, Copyright (C) 2012-2014
  * @brief      Board specific options that modify PiOS capabilities
  * @see        The GNU Public License (GPL) Version 3
- * 
+ *
  *****************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -35,48 +35,46 @@
 #define PIOS_INCLUDE_BL_HELPER
 
 /* Enable/Disable PiOS Modules */
-//#define PIOS_INCLUDE_ADC
 #define PIOS_INCLUDE_DELAY
 #define PIOS_INCLUDE_I2C
+#define WDG_STATS_DIAGNOSTICS
 #define PIOS_INCLUDE_IRQ
 #define PIOS_INCLUDE_LED
 #define PIOS_INCLUDE_IAP
-//#define PIOS_INCLUDE_TIM
-
-#define PIOS_INCLUDE_RCVR
-
-/* Supported receiver interfaces */
-//#define PIOS_INCLUDE_DSM
-//#define PIOS_INCLUDE_SBUS
-//#define PIOS_INCLUDE_PPM
-//#define PIOS_INCLUDE_PWM
-#define PIOS_INCLUDE_GCSRCVR
-
-/* Supported USART-based PIOS modules */
-#define PIOS_INCLUDE_TELEMETRY_RF
-//#define PIOS_INCLUDE_GPS
-//#define PIOS_GPS_MINIMAL
-
-//#define PIOS_INCLUDE_SERVO
+#define PIOS_INCLUDE_TIM
+#define PIOS_INCLUDE_SERVO
 #define PIOS_INCLUDE_SPI
 #define PIOS_INCLUDE_SYS
 #define PIOS_INCLUDE_USART
 #define PIOS_INCLUDE_USB
 #define PIOS_INCLUDE_USB_HID
 #define PIOS_INCLUDE_USB_CDC
-#define PIOS_INCLUDE_COM
 //#define PIOS_INCLUDE_GPIO
 #define PIOS_INCLUDE_EXTI
 #define PIOS_INCLUDE_RTC
 #define PIOS_INCLUDE_WDG
 #define PIOS_INCLUDE_FASTHEAP
 
-//#define PIOS_INCLUDE_MPU6050
-//#define PIOS_MPU6050_ACCEL
+/* Sensors to include */
+#define PIOS_INCLUDE_LSM9DS1
+#define FLASH_FREERTOS
+/* Com systems to include */
+#define PIOS_INCLUDE_COM
+#define PIOS_INCLUDE_COM_TELEM
+#define PIOS_INCLUDE_TELEMETRY_RF
+#define PIOS_INCLUDE_COM_FLEXI
+#define PIOS_INCLUDE_SESSION_MANAGEMENT
+//#define PIOS_INCLUDE_LIGHTTELEMETRY
+#define PIOS_INCLUDE_PICOC
+
+/* Supported receiver interfaces */
+#define PIOS_INCLUDE_RCVR
+#define PIOS_INCLUDE_GCSRCVR
 
 #define PIOS_INCLUDE_FLASH
-#define PIOS_INCLUDE_FLASH_INTERNAL
 #define PIOS_INCLUDE_LOGFS_SETTINGS
+#define PIOS_INCLUDE_FLASH_INTERNAL
+#define PIOS_INCLUDE_FLASH_JEDEC
 
 /* Other Interfaces */
 //#define PIOS_INCLUDE_I2C_ESC
@@ -84,6 +82,8 @@
 /* Flags that alter behaviors - mostly to lower resources for CC */
 #define PIOS_INCLUDE_INITCALL           /* Include init call structures */
 #define PIOS_TELEM_PRIORITY_QUEUE       /* Enable a priority queue in telemetry */
+
+#define CAMERASTAB_POI_MODE
 
 /* Alarm Thresholds */
 #define HEAP_LIMIT_WARNING		4000
@@ -106,8 +106,7 @@
  */
 #define IDLE_COUNTS_PER_SEC_AT_NO_LOAD (6984538)
 
-//This enables altitude hold in manualcontrol module
-//#define REVOLUTION
+#define REVOLUTION
 
 #endif /* PIOS_CONFIG_H */
 /**

@@ -2,9 +2,9 @@
 # @file       UAVObjects.inc
 # @author     The OpenPilot Team, http://www.openpilot.org, Copyright (C) 2011.
 # @author     Tau Labs, http://taulabs.org, Copyright (C) 2012-2013
-# @addtogroup 
+# @addtogroup
 # @{
-# @addtogroup 
+# @addtogroup
 # @{
 # @brief Makefile includes for UAVObject source files
 ###############################################################################
@@ -28,17 +28,73 @@
 # (all architectures)
 
 UAVOBJSRCFILENAMES =
+UAVOBJSRCFILENAMES += acceldesired
+UAVOBJSRCFILENAMES += accessorydesired
+UAVOBJSRCFILENAMES += actuatorcommand
+UAVOBJSRCFILENAMES += actuatordesired
+UAVOBJSRCFILENAMES += actuatorsettings
+UAVOBJSRCFILENAMES += attitudesettings
+UAVOBJSRCFILENAMES += inssettings
+UAVOBJSRCFILENAMES += attitudeactual
+UAVOBJSRCFILENAMES += gyros
+UAVOBJSRCFILENAMES += gyrosbias
+UAVOBJSRCFILENAMES += sensorsettings
 UAVOBJSRCFILENAMES += accels
+UAVOBJSRCFILENAMES += magnetometer
+UAVOBJSRCFILENAMES += magbias
+UAVOBJSRCFILENAMES += baroaltitude
+UAVOBJSRCFILENAMES += baroairspeed
+UAVOBJSRCFILENAMES += airspeedsettings
+UAVOBJSRCFILENAMES += airspeedactual
+UAVOBJSRCFILENAMES += fixedwingairspeeds
+UAVOBJSRCFILENAMES += fixedwingpathfollowersettings
+UAVOBJSRCFILENAMES += fixedwingpathfollowerstatus
+UAVOBJSRCFILENAMES += flightbatterysettings
 UAVOBJSRCFILENAMES += firmwareiapobj
+UAVOBJSRCFILENAMES += flightbatterystate
+UAVOBJSRCFILENAMES += flightplancontrol
+UAVOBJSRCFILENAMES += flightplansettings
+UAVOBJSRCFILENAMES += flightplanstatus
 UAVOBJSRCFILENAMES += flighttelemetrystats
 UAVOBJSRCFILENAMES += gcstelemetrystats
+UAVOBJSRCFILENAMES += gpsposition
+UAVOBJSRCFILENAMES += gpssatellites
+UAVOBJSRCFILENAMES += gpstime
+UAVOBJSRCFILENAMES += gpsvelocity
+UAVOBJSRCFILENAMES += groundpathfollowersettings
+UAVOBJSRCFILENAMES += loitercommand
+UAVOBJSRCFILENAMES += vtolpathfollowersettings
+UAVOBJSRCFILENAMES += vtolpathfollowerstatus
+UAVOBJSRCFILENAMES += homelocation
+UAVOBJSRCFILENAMES += insstate
+UAVOBJSRCFILENAMES += manualcontrolcommand
+UAVOBJSRCFILENAMES += manualcontrolsettings
+UAVOBJSRCFILENAMES += mixersettings
+UAVOBJSRCFILENAMES += mixerstatus
 UAVOBJSRCFILENAMES += nedaccel
+UAVOBJSRCFILENAMES += nedposition
 UAVOBJSRCFILENAMES += objectpersistence
 UAVOBJSRCFILENAMES += overosyncstats
+UAVOBJSRCFILENAMES += overosyncsettings
+UAVOBJSRCFILENAMES += pathdesired
+UAVOBJSRCFILENAMES += pathplannersettings
+UAVOBJSRCFILENAMES += pathstatus
+UAVOBJSRCFILENAMES += poilocation
+UAVOBJSRCFILENAMES += positionactual
+UAVOBJSRCFILENAMES += ratedesired
+UAVOBJSRCFILENAMES += relaytuning
+UAVOBJSRCFILENAMES += relaytuningsettings
+UAVOBJSRCFILENAMES += sonaraltitude
+UAVOBJSRCFILENAMES += stabilizationdesired
+UAVOBJSRCFILENAMES += stabilizationsettings
+UAVOBJSRCFILENAMES += stateestimation
 UAVOBJSRCFILENAMES += systemalarms
 UAVOBJSRCFILENAMES += systemsettings
 UAVOBJSRCFILENAMES += systemstats
+UAVOBJSRCFILENAMES += tabletinfo
 UAVOBJSRCFILENAMES += taskinfo
+UAVOBJSRCFILENAMES += velocityactual
+UAVOBJSRCFILENAMES += velocitydesired
 UAVOBJSRCFILENAMES += watchdogstatus
 UAVOBJSRCFILENAMES += flightstatus
 UAVOBJSRCFILENAMES += modulesettings
@@ -46,6 +102,24 @@ UAVOBJSRCFILENAMES += hwdiscoveryf4
 UAVOBJSRCFILENAMES += receiveractivity
 UAVOBJSRCFILENAMES += gcsreceiver
 UAVOBJSRCFILENAMES += faultsettings
+UAVOBJSRCFILENAMES += cameradesired
+UAVOBJSRCFILENAMES += camerastabsettings
+UAVOBJSRCFILENAMES += altitudeholdsettings
+UAVOBJSRCFILENAMES += altitudeholddesired
+UAVOBJSRCFILENAMES += waypoint
+UAVOBJSRCFILENAMES += waypointactive
+UAVOBJSRCFILENAMES += ubloxinfo
+UAVOBJSRCFILENAMES += hottsettings
+UAVOBJSRCFILENAMES += picocsettings
+UAVOBJSRCFILENAMES += picocstatus
+
+UAVOBJSRCFILENAMES += txpidsettings
+
+UAVOBJSRCFILENAMES += vibrationanalysissettings
+UAVOBJSRCFILENAMES += vibrationanalysisoutput
+UAVOBJSRCFILENAMES += trimangles
+UAVOBJSRCFILENAMES += trimanglessettings
+
 UAVOBJSRCFILENAMES += sessionmanaging
 
 UAVOBJSRC = $(foreach UAVOBJSRCFILE,$(UAVOBJSRCFILENAMES),$(OPUAVSYNTHDIR)/$(UAVOBJSRCFILE).c )

@@ -104,11 +104,11 @@ static const struct pios_exti_cfg pios_exti_lsm9ds1_cfg __exti_config = {
 
 static const struct pios_lsm9ds1_cfg lsm9ds1_cfg = {
 	.exti_cfg = &pios_exti_lsm9ds1_cfg,
-	.i2c_addr_ax_g = LSM9DS1_I2C_ADDR_L,
+	.i2c_addr_ax_g = LSM9DS1_I2C_AX_G_ADDR_L,
 	.i2c_addr_mag = LSM9DS1_I2C_MAG_ADDR_L,
 	.accel_fs = LSM9DS1_XL_FS_8_G,
-	.gyro_fs = LSM9DS1_G_FS_2000_DPS,
-	.mag_fs = LSM9DS1_M_FS_12_G,
+	.gyro_fs = LSM9DS1_G_FS_500_DPS,
+	.mag_fs = LSM9DS1_M_FS_8_G,
 	.accel_odr = LSM9DS1_XL_ODR_476_HZ,
 	.gyro_odr = LSM9DS1_G_ODR_476_HZ,
 	.mag_odr = LSM9DS1_M_ODR_80_HZ
@@ -418,6 +418,35 @@ void PIOS_Board_Init(void) {
 			panic(1); // indicate missing IRQ separately
 		if (retval != 0)
 			panic(2);
+
+		// To be safe map from UAVO enum to driver enum
+		uint8_t hw_gyro_range;
+		HwDiscoveryF4GyroRangeGet(&hw_gyro_range);
+		switch(hw_gyro_range) {
+			case HWDISCOVERYF4_GYRORANGE_245:
+				PIOS_LSM9DS1_SetGyroRange(LSM9DS1_G_FS_245_DPS);
+				break;
+			case HWDISCOVERYF4_GYRORANGE_500:
+				PIOS_LSM9DS1_SetGyroRange(LSM9DS1_G_FS_500_DPS);
+				break;
+			case HWDISCOVERYF4_GYRORANGE_2000:
+				PIOS_LSM9DS1_SetGyroRange(LSM9DS1_G_FS_2000_DPS);
+				break;
+		}
+
+		uint8_t hw_accel_range;
+		HwDiscoveryF4AccelRangeGet(&hw_accel_range);
+		switch(hw_accel_range) {
+			case HWDISCOVERYF4_ACCELRANGE_2G:
+				PIOS_LSM9DS1_SetAccRange(LSM9DS1_XL_FS_2_G);
+				break;
+			case HWDISCOVERYF4_ACCELRANGE_4G:
+				PIOS_LSM9DS1_SetAccRange(LSM9DS1_XL_FS_4_G);
+				break;
+			case HWDISCOVERYF4_ACCELRANGE_8G:
+				PIOS_LSM9DS1_SetAccRange(LSM9DS1_XL_FS_8_G);
+				break;
+		}
 	} else
 		panic(3);
 #endif
