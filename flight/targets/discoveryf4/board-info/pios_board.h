@@ -5,11 +5,11 @@
  * @addtogroup FlyingF3 FlyingF3 support files
  * @{
  *
- * @file       STM32F4xx_DiscoveryF4 
+ * @file       STM32F4xx_DiscoveryF4
  * @author     Tau Labs, http://taulabs.org, Copyright (C) 2012-2013
  * @brief      Board header file for DiscoveryF4
  * @see        The GNU Public License (GPL) Version 3
- * 
+ *
  *****************************************************************************/
 /*
  * This program is free software; you can redistribute it and/or modify
@@ -32,6 +32,13 @@
 #define STM32F4XX_DISCOVERYF4_H_
 
 #include <stdbool.h>
+
+#if defined(PIOS_INCLUDE_DEBUG_CONSOLE)
+#define DEBUG_LEVEL 0
+#define DEBUG_PRINTF(level, ...) {if(level <= DEBUG_LEVEL && pios_com_debug_id > 0) { PIOS_COM_SendFormattedStringNonBlocking(pios_com_debug_id, __VA_ARGS__); }}
+#else
+#define DEBUG_PRINTF(level, ...)
+#endif	/* PIOS_INCLUDE_DEBUG_CONSOLE */
 
 //------------------------
 // Timers and Channels Used
@@ -102,8 +109,8 @@ TIM8  |           |           |           |
 // See also pios_board.c
 //------------------------
 #define PIOS_I2C_MAX_DEVS			1
-extern uint32_t pios_i2c_gyro_accel_adapter_id;
-#define PIOS_I2C_MPU6050_ADAPTER		(pios_i2c_gyro_accel_adapter_id)
+extern uint32_t pios_i2c_external_adapter_id;
+#define PIOS_I2C_LSM9DS1_ADAPTER		(pios_i2c_external_adapter_id)
 
 //-------------------------
 // PIOS_COM
@@ -127,9 +134,8 @@ extern uintptr_t pios_com_telem_usb_id;
 //------------------------
 // TELEMETRY
 //------------------------
-#define TELEM_QUEUE_SIZE         20
-#define PIOS_TELEM_STACK_SIZE    624
-		
+#define TELEM_QUEUE_SIZE	80
+#define PIOS_TELEM_STACK_SIZE	624
 
 #define PIOS_SYSCLK 168000000
 //	Peripherals that belongs to APB1 are:
@@ -137,16 +143,16 @@ extern uintptr_t pios_com_telem_usb_id;
 //	I2C1,2,3	|UART4,5			|USART3,2
 //	I2S3Ext		|SPI3/I2S3			|SPI2/I2S2
 //	I2S2Ext		|IWDG				|WWDG
-//	RTC/BKP reg	
+//	RTC/BKP reg
 // TIM2,3,4,5,6,7,12,13,14
 
-// Calculated as SYSCLK / APBPresc * (APBPre == 1 ? 1 : 2)   
-// Default APB1 Prescaler = 4 
+// Calculated as SYSCLK / APBPresc * (APBPre == 1 ? 1 : 2)
+// Default APB1 Prescaler = 4
 #define PIOS_PERIPHERAL_APB1_CLOCK					(PIOS_SYSCLK / 2)
 
 //	Peripherals belonging to APB2
 //	SDIO			|EXTI				|SYSCFG			|SPI1
-//	ADC1,2,3				
+//	ADC1,2,3
 //	USART1,6
 //	TIM1,8,9,10,11
 //
