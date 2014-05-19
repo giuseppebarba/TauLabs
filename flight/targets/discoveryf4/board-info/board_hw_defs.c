@@ -401,12 +401,12 @@ static const struct pios_i2c_adapter_cfg pios_i2c_external_adapter_cfg = {
       .GPIO_OType = GPIO_OType_OD,
       .GPIO_PuPd  = GPIO_PuPd_NOPULL,
     },
-    .pin_source = GPIO_PinSource8,
+    .pin_source = GPIO_PinSource6,
   },
   .sda = {
     .gpio = GPIOB,
     .init = {
-      .GPIO_Pin = GPIO_Pin_7,
+      .GPIO_Pin = GPIO_Pin_9,
       .GPIO_Mode  = GPIO_Mode_AF,
       .GPIO_Speed = GPIO_Speed_50MHz,
       .GPIO_OType = GPIO_OType_OD,
