@@ -337,6 +337,14 @@ void PIOS_Board_Init(void) {
 	}
 #endif
 
+#if defined(PIOS_INCLUDE_I2C)
+	if (PIOS_I2C_Init(&pios_i2c_external_adapter_id, &pios_i2c_external_adapter_cfg)) {
+		PIOS_DEBUG_Assert(0);
+	}
+	if (PIOS_I2C_CheckClear(pios_i2c_external_adapter_id) != 0)
+		panic(3);
+#endif
+
 	/* Initialize the alarms library */
 	AlarmsInitialize();
 
