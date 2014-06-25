@@ -118,18 +118,31 @@ extern uint32_t pios_i2c_external_adapter_id;
 // See also pios_board.c
 //-------------------------
 extern uintptr_t pios_com_telem_rf_id;
+extern uintptr_t pios_com_gps_id;
+extern uintptr_t pios_com_telem_usb_id;
+extern uintptr_t pios_com_bridge_id;
+extern uintptr_t pios_com_vcp_id;
+extern uintptr_t pios_com_mavlink_id;
+extern uintptr_t pios_com_frsky_sensor_hub_id;
+extern uintptr_t pios_com_lighttelemetry_id;
+extern uintptr_t pios_com_picoc_id;
+
+#define PIOS_COM_GPS                    (pios_com_gps_id)
+#define PIOS_COM_TELEM_USB              (pios_com_telem_usb_id)
 #define PIOS_COM_TELEM_RF               (pios_com_telem_rf_id)
+#define PIOS_COM_BRIDGE                 (pios_com_bridge_id)
+#define PIOS_COM_VCP                    (pios_com_vcp_id)
+#define PIOS_COM_MAVLINK                (pios_com_mavlink_id)
+#define PIOS_COM_FRSKY_SENSOR_HUB       (pios_com_frsky_sensor_hub_id)
+#define PIOS_COM_LIGHTTELEMETRY         (pios_com_lighttelemetry_id)
+#define PIOS_COM_PICOC                  (pios_com_picoc_id)
 
 #if defined(PIOS_INCLUDE_DEBUG_CONSOLE)
 extern uintptr_t pios_com_debug_id;
 #define PIOS_COM_DEBUG                  (pios_com_debug_id)
 #endif	/* PIOS_INCLUDE_DEBUG_CONSOLE */
 
-extern uintptr_t pios_com_vcp_id;
-#define PIOS_COM_VCP			(pios_com_vcp_id)
 
-extern uintptr_t pios_com_telem_usb_id;
-#define PIOS_COM_TELEM_USB              (pios_com_telem_usb_id)
 
 //------------------------
 // TELEMETRY
@@ -174,13 +187,39 @@ extern uintptr_t pios_com_telem_usb_id;
 // PIOS_RCVR
 // See also pios_board.c
 //------------------------
-#define PIOS_RCVR_MAX_CHANNELS       12
-#define PIOS_GCSRCVR_TIMEOUT_MS     100
+#define PIOS_RCVR_MAX_CHANNELS			12
+#define PIOS_GCSRCVR_TIMEOUT_MS			100
+
+//-------------------------
+// Receiver PPM input
+//-------------------------
+#define PIOS_PPM_NUM_INPUTS				12
+
+//-------------------------
+// Receiver PWM input
+//-------------------------
+#define PIOS_PWM_NUM_INPUTS				8
+
+//-------------------------
+// Receiver DSM input
+//-------------------------
+#define PIOS_DSM_NUM_INPUTS				12
+
+//-------------------------
+// Receiver S.Bus input
+//-------------------------
+#define PIOS_SBUS_NUM_INPUTS			(16+2)
+
+//-------------------------
+// Servo outputs
+//-------------------------
+#define PIOS_SERVO_UPDATE_HZ			50
+#define PIOS_SERVOS_INITIAL_POSITION	0 /* dont want to start motors, have no pulse till settings loaded */
 
 //--------------------------
 // Timer controller settings
 //--------------------------
-#define PIOS_TIM_MAX_DEVS			6
+#define PIOS_TIM_MAX_DEVS				8
 
 //-------------------------
 // ADC

@@ -40,17 +40,24 @@ MODULES += Stabilization
 MODULES += FirmwareIAP
 MODULES += Telemetry
 
-OPTMODULES += AltitudeHold
-OPTMODULES += VtolPathFollower
+OPTMODULES += GPS
+OPTMODULES += PathPlanner
+OPTMODULES += AltitudeHold 
+OPTMODULES += VtolPathFollower 
 OPTMODULES += FixedWingPathFollower
 OPTMODULES += GroundPathFollower
 OPTMODULES += CameraStab
 OPTMODULES += Autotune
 OPTMODULES += TxPID
 OPTMODULES += VibrationAnalysis
+OPTMODULES += UAVOMavlinkBridge
+OPTMODULES += UAVOFrSKYSensorHubBridge
 OPTMODULES += Battery
+OPTMODULES += ComUsbBridge
 OPTMODULES += Airspeed/revolution
 OPTMODULES += UAVOLighttelemetryBridge
+OPTMODULES += PicoC
+
 
 # Paths
 OPUAVTALKINC = $(OPUAVTALK)/inc
@@ -111,18 +118,26 @@ SRC += $(FLIGHTLIB)/sanitycheck.c
 SRC += $(MATHLIB)/coordinate_conversions.c
 SRC += $(MATHLIB)/sin_lookup.c
 SRC += $(MATHLIB)/misc_math.c
-SRC += $(MATHLIB)/atmospheric_math.c
 SRC += $(MATHLIB)/pid.c
+SRC += $(MATHLIB)/atmospheric_math.c
 
 ## PIOS Hardware (STM32F4xx)
 include $(PIOS)/STM32F4xx/library_fw.mk
 
 ## PIOS Hardware (Common)
 SRC += $(PIOSCOMMON)/pios_delay.c
+SRC += $(PIOSCOMMON)/pios_mpu6050.c
 SRC += $(PIOSCOMMON)/pios_gcsrcvr.c
+SRC += $(PIOSCOMMON)/pios_hmc5883.c
+SRC += $(PIOSCOMMON)/pios_ms5611.c
+SRC += $(PIOSCOMMON)/pios_etasv3.c
+SRC += $(PIOSCOMMON)/pios_mpxv5004.c
+SRC += $(PIOSCOMMON)/pios_mpxv7002.c
 SRC += $(PIOSCOMMON)/pios_crc.c
 SRC += $(PIOSCOMMON)/pios_com.c
 SRC += $(PIOSCOMMON)/pios_rcvr.c
+SRC += $(PIOSCOMMON)/pios_sbus.c
+SRC += $(PIOSCOMMON)/pios_hsum.c
 SRC += $(PIOSCOMMON)/pios_sensors.c
 SRC += $(PIOSCOMMON)/pios_flash.c
 SRC += $(PIOSCOMMON)/pios_flash_jedec.c
