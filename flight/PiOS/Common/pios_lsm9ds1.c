@@ -202,8 +202,14 @@ static int32_t PIOS_LSM9DS1_Read_Mag(uint8_t reg, uint8_t * buffer, uint8_t len)
 int32_t PIOS_LSM9DS1_SetGyroRange(enum pios_lsm9ds1_fs_g gyro_fs)
 {
 	int32_t ret = -1;
+	uint8_t reg = 0x0;
 
-	ret = PIOS_LSM9DS1_Write_AxG(LSM9DS1_CTRL_REG1_G, gyro_fs);
+	ret = PIOS_LSM9DS1_Read_AxG(LSM9DS1_CTRL_REG1_G, &reg, 1);
+	if (ret < 0)
+			return ret;
+
+	reg = (reg & ~LSM9DS1_CTRL_REG1_G_FS_MASK) | (gyro_fs & LSM9DS1_CTRL_REG1_G_FS_MASK);
+	ret = PIOS_LSM9DS1_Write_AxG(LSM9DS1_CTRL_REG1_G, reg);
 	if (ret < 0)
 		return ret;
 
@@ -229,8 +235,14 @@ int32_t PIOS_LSM9DS1_SetGyroRange(enum pios_lsm9ds1_fs_g gyro_fs)
 int32_t PIOS_LSM9DS1_SetAccRange(enum pios_lsm9ds1_fs_xl accel_fs)
 {
 	int32_t ret = -1;
+	uint8_t reg = 0x0;
 
-	ret = PIOS_LSM9DS1_Write_AxG(LSM9DS1_CTRL_REG6_XL, accel_fs);
+	ret = PIOS_LSM9DS1_Read_AxG(LSM9DS1_CTRL_REG6_XL, &reg, 1);
+	if (ret < 0)
+			return ret;
+
+	reg = (reg & ~LSM9DS1_CTRL_REG6_XL_FS_MASK) | (accel_fs & LSM9DS1_CTRL_REG6_XL_FS_MASK);
+	ret = PIOS_LSM9DS1_Write_AxG(LSM9DS1_CTRL_REG6_XL, reg);
 	if (ret < 0)
 		return ret;
 
@@ -244,8 +256,15 @@ int32_t PIOS_LSM9DS1_SetAccRange(enum pios_lsm9ds1_fs_xl accel_fs)
 int32_t PIOS_LSM9DS1_SetMagRange(enum pios_lsm9ds1_fs_m mag_fs)
 {
 	int32_t ret = -1;
+	uint8_t reg = 0x0;
 
-	ret = PIOS_LSM9DS1_Write_Mag(LSM9DS1_CTRL_REG2_M, mag_fs);
+	ret = PIOS_LSM9DS1_Read_Mag(LSM9DS1_CTRL_REG2_M, &reg, 1);
+	if (ret < 0)
+			return ret;
+
+	reg = (reg & ~LSM9DS1_CTRL_REG2_M_FS_MASK) | (mag_fs & LSM9DS1_CTRL_REG2_M_FS_MASK);
+
+	ret = PIOS_LSM9DS1_Write_Mag(LSM9DS1_CTRL_REG2_M, reg);
 	if (ret < 0)
 		return ret;
 
@@ -256,14 +275,22 @@ int32_t PIOS_LSM9DS1_SetMagRange(enum pios_lsm9ds1_fs_m mag_fs)
 /**
  * Set gyro odr
  */
-int32_t PIOS_LSM9DS1_SetGyroODR(enum pios_lsm9ds1_odr_g odr)
+int32_t PIOS_LSM9DS1_SetGyroODR(enum pios_lsm9ds1_odr_g gyro_odr)
 {
 	int32_t ret = -1;
-	ret = PIOS_LSM9DS1_Write_AxG(LSM9DS1_CTRL_REG1_G, odr);
+	uint8_t reg = 0x0;
+
+	ret = PIOS_LSM9DS1_Read_AxG(LSM9DS1_CTRL_REG1_G, &reg, 1);
 	if (ret < 0)
 		return ret;
 
-	switch(odr) {
+	reg = (reg & ~LSM9DS1_CTRL_REG1_G_ODR_MASK) | (gyro_odr & LSM9DS1_CTRL_REG1_G_ODR_MASK);
+
+	ret = PIOS_LSM9DS1_Write_AxG(LSM9DS1_CTRL_REG1_G, reg);
+	if (ret < 0)
+		return ret;
+
+	switch(gyro_odr) {
 		case LSM9DS1_G_ODR_14_9_HZ:
 			dev->gyro_odr_hz = 14.9f;
 			break;
@@ -293,14 +320,22 @@ int32_t PIOS_LSM9DS1_SetGyroODR(enum pios_lsm9ds1_odr_g odr)
 /**
  * Set Acc odr
  */
-int32_t PIOS_LSM9DS1_SetAccODR(enum pios_lsm9ds1_odr_xl odr)
+int32_t PIOS_LSM9DS1_SetAccODR(enum pios_lsm9ds1_odr_xl accel_odr)
 {
 	int32_t ret = -1;
-	ret = PIOS_LSM9DS1_Write_AxG(LSM9DS1_CTRL_REG6_XL, odr);
+	uint8_t reg = 0x0;
+
+	ret = PIOS_LSM9DS1_Read_AxG(LSM9DS1_CTRL_REG6_XL, &reg, 1);
 	if (ret < 0)
 		return ret;
 
-	switch(odr) {
+	reg = (reg & ~LSM9DS1_CTRL_REG6_XL_ODR_MASK) | (accel_odr & LSM9DS1_CTRL_REG6_XL_ODR_MASK);
+
+	ret = PIOS_LSM9DS1_Write_AxG(LSM9DS1_CTRL_REG6_XL, reg);
+	if (ret < 0)
+		return ret;
+
+	switch(accel_odr) {
 		case LSM9DS1_XL_ODR_10_HZ:
 			dev->gyro_odr_hz = 10.0f;
 			break;
@@ -330,14 +365,22 @@ int32_t PIOS_LSM9DS1_SetAccODR(enum pios_lsm9ds1_odr_xl odr)
 /**
  * Set Mag odr
  */
-int32_t PIOS_LSM9DS1_SetMagODR(enum pios_lsm9ds1_odr_m odr)
+int32_t PIOS_LSM9DS1_SetMagODR(enum pios_lsm9ds1_odr_m mag_odr)
 {
 	int32_t ret = -1;
-	ret = PIOS_LSM9DS1_Write_Mag(LSM9DS1_CTRL_REG1_M, odr);
+	uint8_t reg = 0x0;
+
+	ret = PIOS_LSM9DS1_Read_Mag(LSM9DS1_CTRL_REG1_M, &reg, 1);
 	if (ret < 0)
 		return ret;
 
-	switch(odr) {
+	reg = (reg & ~LSM9DS1_CTRL_REG1_M_ODR_MASK) | (mag_odr & LSM9DS1_CTRL_REG1_M_ODR_MASK);
+
+	ret = PIOS_LSM9DS1_Write_Mag(LSM9DS1_CTRL_REG1_M, reg);
+	if (ret < 0)
+		return ret;
+
+	switch(mag_odr) {
 		case LSM9DS1_M_ODR_0_625_HZ:
 			dev->mag_odr_hz = 0.625f;
 			break;
