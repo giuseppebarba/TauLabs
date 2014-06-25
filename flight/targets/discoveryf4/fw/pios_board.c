@@ -99,7 +99,7 @@ static const struct pios_exti_cfg pios_exti_lsm9ds1_cfg __exti_config = {
 	},
 	.exti = {
 		.init = {
-			.EXTI_Line = EXTI_Line11, // matches above GPIO pin
+			.EXTI_Line = EXTI_Line11,
 			.EXTI_Mode = EXTI_Mode_Interrupt,
 			.EXTI_Trigger = EXTI_Trigger_Rising,
 			.EXTI_LineCmd = ENABLE,
@@ -293,6 +293,7 @@ void PIOS_Board_Init(void) {
 	PIOS_LED_Init(led_cfg);
 #endif	/* PIOS_INCLUDE_LED */
 
+
 #if defined(PIOS_INCLUDE_FLASH)
 	/* Inititialize all flash drivers */
 	if (PIOS_Flash_Internal_Init(&pios_internal_flash_id, &flash_internal_cfg) != 0)
@@ -335,14 +336,6 @@ void PIOS_Board_Init(void) {
 	if ((CoreDebug->DHCSR & CoreDebug_DHCSR_C_DEBUGEN_Msk) == 0) {
 		PIOS_WDG_Init();
 	}
-#endif
-
-#if defined(PIOS_INCLUDE_I2C)
-	if (PIOS_I2C_Init(&pios_i2c_external_adapter_id, &pios_i2c_external_adapter_cfg)) {
-		PIOS_DEBUG_Assert(0);
-	}
-	if (PIOS_I2C_CheckClear(pios_i2c_external_adapter_id) != 0)
-		panic(3);
 #endif
 
 	/* Initialize the alarms library */
@@ -926,7 +919,8 @@ void PIOS_Board_Init(void) {
 		panic(5);
 
 #if defined(PIOS_INCLUDE_LSM9DS1)
-	if (PIOS_LSM9DS1_Probe(pios_i2c_external_adapter_id, lsm9ds1_cfg.i2c_addr_ax_g) == LSM9DS1_WHO_AM_I_VAL) {
+	if (PIOS_LSM9DS1_Probe(pios_i2c_external_adapter_id, lsm9ds1_cfg.i2c_addr_ax_g) == LSM9DS1_WHO_AM_I_VAL)
+	{
 		int retval;
 		retval = PIOS_LSM9DS1_Init(pios_i2c_external_adapter_id, &lsm9ds1_cfg);
 		if (retval == -10)
