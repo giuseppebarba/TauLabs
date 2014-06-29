@@ -590,15 +590,15 @@ static float PIOS_LSM9DS1_GetAccScale()
 {
 	switch (dev->accel_fs) {
 	case LSM9DS1_XL_FS_2_G:
-		return 61.0f;
+		return (0.061 * 9.81 / 1000.0);
 	case LSM9DS1_XL_FS_4_G:
-		return 122.0f;
+		return (0.122 * 9.81 / 1000.0);
 	case LSM9DS1_XL_FS_8_G:
-		return 244.0f;
+		return (0.244 * 9.81 / 1000.0);
 	}
 	return 0;
 }
-
+#if 1
 /**
  * @brief Get Magnetometer sensitivity related to the selected full scale
  * @return mgauss/LSB sensitivity factor, 0 on failure
@@ -617,7 +617,7 @@ static float PIOS_LSM9DS1_GetMagScale()
 	}
 	return 0;
 }
-
+#endif
 /**
  * Check if an LSM9DS1 is detected at the requested address
  * @return 0 if detected, -1 if successfully probed but wrong id
@@ -724,11 +724,11 @@ static void PIOS_LSM9DS1_Task(void *parameters)
 
 		if ((rec_buf[0] & (LSM9DS1_STATUS_REG_M_XDA | LSM9DS1_STATUS_REG_M_YDA | LSM9DS1_STATUS_REG_M_ZDA)) != 0) {
 
-			if (PIOS_LSM9DS1_Read_Mag(LSM9DS1_STATUS_REG_M, rec_buf, sizeof(rec_buf)) < 0) {
+			if (PIOS_LSM9DS1_Read_Mag(LSM9DS1_OUT_X_L_M, rec_buf, sizeof(rec_buf)) < 0) {
 				continue;
 			}
-
 			sensitivity = PIOS_LSM9DS1_GetMagScale();
+
 			mag_data.x =
 			    ((int16_t) ((rec_buf[1] << 8) | rec_buf[0])) *
 			    sensitivity;
