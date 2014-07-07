@@ -956,8 +956,7 @@ void PIOS_Board_Init(void) {
 				PIOS_LSM9DS1_SetAccRange(LSM9DS1_XL_FS_8_G);
 				break;
 		}
-	} else
-		panic(3);
+	}
 #endif
 
 	//I2C is slow, sensor init as well, reset watchdog to prevent reset here

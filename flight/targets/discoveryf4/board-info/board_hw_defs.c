@@ -288,6 +288,7 @@ static const struct flashfs_logfs_cfg flashfs_waypoints_cfg = {
 	.slot_size     = 0x00000040, /* 64 bytes */
 };
 
+#include "pios_flash_jedec_priv.h"
 
 static const struct pios_flash_jedec_cfg flash_m25p_cfg = {
   .expect_manufacturer = JEDEC_MANUFACTURER_ST,
@@ -384,56 +385,55 @@ static const struct pios_i2c_adapter_cfg pios_i2c_external_adapter_cfg = {
   .regs = I2C1,
   .remap = GPIO_AF_I2C1,
   .init = {
-	.I2C_Mode                = I2C_Mode_I2C,
-	.I2C_OwnAddress1         = 0,
-	.I2C_Ack                 = I2C_Ack_Enable,
-	.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit,
-	.I2C_DutyCycle           = I2C_DutyCycle_2,
-	.I2C_ClockSpeed          = 400000,	/* bits/s */
+    .I2C_Mode                = I2C_Mode_I2C,
+    .I2C_OwnAddress1         = 0,
+    .I2C_Ack                 = I2C_Ack_Enable,
+    .I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit,
+    .I2C_DutyCycle           = I2C_DutyCycle_2,
+    .I2C_ClockSpeed          = 400000,	/* bits/s */
   },
   .transfer_timeout_ms = 50,
   .scl = {
-	.gpio = GPIOB,
-	.init = {
+    .gpio = GPIOB,
+    .init = {
 			.GPIO_Pin = GPIO_Pin_6,
-			.GPIO_Mode  = GPIO_Mode_AF,
-			.GPIO_Speed = GPIO_Speed_50MHz,
-			.GPIO_OType = GPIO_OType_OD,
-			.GPIO_PuPd  = GPIO_PuPd_NOPULL,
-	},
+            .GPIO_Mode  = GPIO_Mode_AF,
+            .GPIO_Speed = GPIO_Speed_50MHz,
+            .GPIO_OType = GPIO_OType_OD,
+            .GPIO_PuPd  = GPIO_PuPd_NOPULL,
+    },
 	.pin_source = GPIO_PinSource6,
   },
   .sda = {
-	.gpio = GPIOB,
-	.init = {
+    .gpio = GPIOB,
+    .init = {
 			.GPIO_Pin = GPIO_Pin_9,
-			.GPIO_Mode  = GPIO_Mode_AF,
-			.GPIO_Speed = GPIO_Speed_50MHz,
-			.GPIO_OType = GPIO_OType_OD,
-			.GPIO_PuPd  = GPIO_PuPd_NOPULL,
-	},
+            .GPIO_Mode  = GPIO_Mode_AF,
+            .GPIO_Speed = GPIO_Speed_50MHz,
+            .GPIO_OType = GPIO_OType_OD,
+            .GPIO_PuPd  = GPIO_PuPd_NOPULL,
+    },
 	.pin_source = GPIO_PinSource9,
   },
   .event = {
-	.flags   = 0,		/* FIXME: check this */
-	.init = {
+    .flags   = 0,		/* FIXME: check this */
+    .init = {
 			.NVIC_IRQChannel = I2C1_EV_IRQn,
 			.NVIC_IRQChannelPreemptionPriority = PIOS_IRQ_PRIO_HIGHEST,
 			.NVIC_IRQChannelSubPriority = 0,
 			.NVIC_IRQChannelCmd = ENABLE,
-	},
+    },
   },
   .error = {
-	.flags   = 0,		/* FIXME: check this */
-	.init = {
+    .flags   = 0,		/* FIXME: check this */
+    .init = {
 			.NVIC_IRQChannel = I2C1_ER_IRQn,
 			.NVIC_IRQChannelPreemptionPriority = PIOS_IRQ_PRIO_HIGHEST,
 			.NVIC_IRQChannelSubPriority = 0,
 			.NVIC_IRQChannelCmd = ENABLE,
-	},
+    },
   },
 };
-
 
 uint32_t pios_i2c_external_adapter_id;
 void PIOS_I2C_external_ev_irq_handler(void)
@@ -447,8 +447,6 @@ void PIOS_I2C_external_er_irq_handler(void)
   /* Call into the generic code to handle the IRQ for this specific device */
   PIOS_I2C_ER_IRQ_Handler(pios_i2c_external_adapter_id);
 }
-
-
 
 #endif /* PIOS_INCLUDE_I2C */
 
