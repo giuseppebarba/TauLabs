@@ -288,5 +288,10 @@ int32_t PIOS_LSM9DS1_SetGyroODR(enum pios_lsm9ds1_odr_g odr);
 int32_t PIOS_LSM9DS1_SetAccODR(enum pios_lsm9ds1_odr_xl odr);
 int32_t PIOS_LSM9DS1_SetMagODR(enum pios_lsm9ds1_odr_m odr);
 bool PIOS_LSM9DS1_IRQHandler(void);
+#if defined(LSM9DS1_USE_SPI)
+int32_t PIOS_LSM9DS1_Init(uint32_t spi_id, uint32_t AxG_slave_num,
+					uint32_t Mag_slave_num, const struct pios_lsm9ds1_cfg * cfg)
+#else
 int32_t PIOS_LSM9DS1_Init(uint32_t i2c_id, const struct pios_lsm9ds1_cfg * cfg);
+#endif
 #endif
