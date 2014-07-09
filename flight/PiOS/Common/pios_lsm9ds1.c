@@ -48,7 +48,8 @@ enum pios_lsm9ds1_dev_magic {
 struct lsm9ds1_dev {
 #if defined(LSM9DS1_USE_SPI)
 	uint32_t spi_id;
-	uint32_t slave_num;
+	uint32_t AxG_slave_num;
+	uint32_t Mag_slave_num;
 #else
 	/** Use I2C serial interface */
 	uint32_t i2c_id;
@@ -75,6 +76,97 @@ struct lsm9ds1_dev {
 
 //! Global structure for this device device
 static struct lsm9ds1_dev *dev;
+
+#if defined(LSM9DS1_USE_SPI)
+/**
+ * @brief Claim the SPI bus for the communications and select this chip
+ * @return 0 if successful, -1 for invalid device, -2 if unable to claim bus
+ */
+static int32_t PIOS_LSM9DS1_ClaimBus(uint32_t slave_num)
+{
+	if (PIOS_LSM9DS1_Validate(dev) != 0)
+		return -1;
+
+	if (PIOS_SPI_ClaimBus(dev->spi_id) != 0)
+		return -2;
+
+	PIOS_SPI_RC_PinSet(dev->spi_id, slave_num, 0);
+
+	return 0;
+}
+
+/**
+ * @brief Release the SPI bus for the communications and end the transaction
+ * \param[in] must be true when bus was claimed in lowspeed mode
+ * @return 0 if successful
+ */
+static int32_t PIOS_LSM9DS1_ReleaseBus(uint32_t slave_num)
+{
+	if (PIOS_LSM9DS1_Validate(dev) != 0)
+		return -1;
+
+	PIOS_SPI_RC_PinSet(dev->spi_id, slave_num, 1);
+
+	return PIOS_SPI_ReleaseBus(dev->spi_id);
+}
+
+/**
+ * @brief Read a register from LSM9DS1
+ * @returns The register value
+ * @param reg Register address to be read
+ * @param *buffer Buffer to store data
+ * @param len Number of bytes to be read
+ * @return 0 if success
+ */
+static uint8_t PIOS_LSM9DS1_Read_SPI(uint32_t slave_num, uint8_t reg,
+												uint8_t *buffer, uint8_t len)
+{
+	uint8_t ret;
+
+	if (PIOS_LSM9DS1_ClaimBus(slave_num) != 0)
+		return -1;
+
+	if (PIOS_SPI_TransferByte(dev->spi_id, 0x80 | reg) < 0) {
+		rc = -2;
+		goto out;
+	}
+	if (PIOS_SPI_TransferBlock(dev->spi_id, NULL, buffer, len, NULL) < 0) {
+		rc = -3;
+		goto out;
+	}
+
+	rc = 0;
+out:
+	PIOS_LSM9DS1_ReleaseBus(slave_num);
+
+	return rc;
+}
+
+/**
+ * @brief Writes one byte to the LSM9DS1 register
+ * \param[in] reg Register address
+ * \param[in] data Byte to write
+ * @returns 0 when success
+ */
+static int32_t PIOS_LSM9DS1_Write_SPI(uint32_t slave_num, uint8_t reg, uint8_t data)
+{
+	uint8_t ret;
+
+	if (PIOS_LSM9DS1_ClaimBus(slave_num) != 0)
+		return -1;
+
+	if (PIOS_SPI_TransferByte(dev->spi_id, 0x7F | reg) < 0) {
+		rc = -2;
+		goto out;
+	}
+	PIOS_SPI_TransferByte(dev->spi_id, data);
+
+	PIOS_LSM9DS1_ReleaseBus(slave_num);
+
+	return 0;
+}
+
+#else
 
 /**
  * @brief Writes one or more bytes to Acc and Gyr of the LSM9DS1
@@ -141,6 +233,7 @@ static int32_t PIOS_LSM9DS1_Read_I2C(uint8_t i2c_addr, uint8_t address,
 
 	return PIOS_I2C_Transfer(dev->i2c_id, txn_list, NELEMENTS(txn_list));
 }
+#endif
 
 /**
  * @brief Writes one byte to Acc and Gyro
@@ -152,7 +245,9 @@ static int32_t PIOS_LSM9DS1_Read_I2C(uint8_t i2c_addr, uint8_t address,
  */
 static int32_t PIOS_LSM9DS1_Write_AxG(uint8_t reg, uint8_t data)
 {
-#if !defined(LSM9DS1_USE_SPI)
+#if defined(LSM9DS1_USE_SPI)
+	return PIOS_LSM9DS1_Write_SPI(dev->AxG_slave_num, reg, data);
+#else
 	return PIOS_LSM9DS1_Write_i2c(dev->i2c_addr_ax_g, reg, data);
 #endif
 }
@@ -167,7 +262,9 @@ static int32_t PIOS_LSM9DS1_Write_AxG(uint8_t reg, uint8_t data)
  */
 static int32_t PIOS_LSM9DS1_Write_Mag(uint8_t reg, uint8_t data)
 {
-#if !defined(LSM9DS1_USE_SPI)
+#if defined(LSM9DS1_USE_SPI)
+	return PIOS_LSM9DS1_Write_SPI(dev->Mag_slave_num, reg, data);
+#else
 	return PIOS_LSM9DS1_Write_i2c(dev->i2c_addr_mag, reg, data);
 #endif
 }
@@ -179,7 +276,9 @@ static int32_t PIOS_LSM9DS1_Write_Mag(uint8_t reg, uint8_t data)
  */
 static int32_t PIOS_LSM9DS1_Read_AxG(uint8_t reg, uint8_t * buffer, uint8_t len)
 {
-#if !defined(LSM9DS1_USE_SPI)
+#if defined(LSM9DS1_USE_SPI)
+	return PIOS_LSM9DS1_Read_SPI(dev->AxG_slave_num, reg, buffer, len);
+#else
 	return PIOS_LSM9DS1_Read_I2C(dev->i2c_addr_ax_g, reg, buffer, len);
 #endif
 }
@@ -191,7 +290,9 @@ static int32_t PIOS_LSM9DS1_Read_AxG(uint8_t reg, uint8_t * buffer, uint8_t len)
  */
 static int32_t PIOS_LSM9DS1_Read_Mag(uint8_t reg, uint8_t * buffer, uint8_t len)
 {
-#if !defined(LSM9DS1_USE_SPI)
+#if defined(LSM9DS1_USE_SPI)
+	return PIOS_LSM9DS1_Read_SPI(dev->Mag_slave_num, reg, buffer, len);
+#else
 	return PIOS_LSM9DS1_Read_I2C(dev->i2c_addr_mag, reg, buffer, len);
 #endif
 }
@@ -620,13 +721,18 @@ static float PIOS_LSM9DS1_GetMagScale()
 #endif
 /**
  * Check if an LSM9DS1 is detected at the requested address
- * @return 0 if detected, -1 if successfully probed but wrong id
+ * @return 1 if detected, -1 if successfully probed but wrong id
  *  -2 no device at address
  */
+#if defined(LSM9DS1_USE_SPI)
+uint8_t PIOS_LSM9DS1_Probe()
+{
+	//if (PIOS_LSM9DS1_Read_AxG(addr, read, 1) < 0)
+	//	return -1;
+	return 1;
+#else
 uint8_t PIOS_LSM9DS1_Probe(uint32_t i2c_id, uint8_t i2c_addr)
 {
-	int32_t retval = -1;
-#if !defined(LSM9DS1_USE_SPI)
 	uint8_t read = 0;
 	uint8_t addr = LSM9DS1_WHO_AM_I;
 
@@ -647,12 +753,11 @@ uint8_t PIOS_LSM9DS1_Probe(uint32_t i2c_id, uint8_t i2c_addr)
 		}
 	};
 
-	retval = PIOS_I2C_Transfer(i2c_id, txn_list, NELEMENTS(txn_list));
-#endif
-	if (retval < 0)
+	if (PIOS_I2C_Transfer(i2c_id, txn_list, NELEMENTS(txn_list)) < 0)
 		return -1;
 
-	return read;
+	return (read != MPU9250_WHOAMI_ID);
+#endif
 }
 
 /**
@@ -743,20 +848,30 @@ static void PIOS_LSM9DS1_Task(void *parameters)
 	}
 }
 
-#if !defined(LSM9DS1_USE_SPI)
+#if defined(LSM9DS1_USE_SPI)
+int32_t PIOS_LSM9DS1_Init(uint32_t spi_id, uint32_t AxG_slave_num,
+					uint32_t Mag_slave_num, const struct pios_lsm9ds1_cfg * cfg)
+#else
 /**
  * @brief Initialize the LSM9DS1 sensor over I2C interface.
  * @return 0 for success, -1 for failure to allocate, -2 for failure to get irq
  */
 int32_t PIOS_LSM9DS1_Init(uint32_t i2c_id, const struct pios_lsm9ds1_cfg * cfg)
 {
+#endif
 	dev = PIOS_LSM9DS1_alloc();
 	if (dev == NULL)
 		return -1;
 
+#if defined(LSM9DS1_USE_SPI)
+	dev->spi_id = spi_id;
+	dev->AxG_slave_num = AxG_slave_num;
+	dev->Mag_slave_num = Mag_slave_num;
+#else
 	dev->i2c_id = i2c_id;
 	dev->i2c_addr_ax_g = cfg->i2c_addr_ax_g;
 	dev->i2c_addr_mag = cfg->i2c_addr_mag;
+#endif
 	dev->cfg = cfg;
 	dev->gyro_odr_hz = 0.0f;
 	dev->accel_odr_hz = 0.0f;
@@ -790,5 +905,4 @@ int32_t PIOS_LSM9DS1_Init(uint32_t i2c_id, const struct pios_lsm9ds1_cfg * cfg)
 
 	return 0;
 }
-#endif
 #endif
