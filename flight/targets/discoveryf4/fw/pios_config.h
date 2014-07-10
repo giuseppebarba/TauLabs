@@ -58,6 +58,7 @@
 
 /* Sensors to include */
 #define PIOS_INCLUDE_LSM9DS1
+#define LSM9DS1_USE_SPI
 #define FLASH_FREERTOS
 /* Com systems to include */
 #define PIOS_INCLUDE_COM

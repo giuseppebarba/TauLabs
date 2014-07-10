@@ -109,8 +109,12 @@ static const struct pios_exti_cfg pios_exti_lsm9ds1_cfg __exti_config = {
 
 static const struct pios_lsm9ds1_cfg lsm9ds1_cfg = {
 	.exti_cfg = &pios_exti_lsm9ds1_cfg,
+#if defined(LSM9DS1_USE_SPI)
+
+#else
 	.i2c_addr_ax_g = LSM9DS1_I2C_AX_G_ADDR_L,
 	.i2c_addr_mag = LSM9DS1_I2C_MAG_ADDR_L,
+#endif
 	.accel_fs = LSM9DS1_XL_FS_8_G,
 	.gyro_fs = LSM9DS1_G_FS_500_DPS,
 	.mag_fs = LSM9DS1_M_FS_8_G,
@@ -917,12 +921,18 @@ void PIOS_Board_Init(void) {
 
 	if (PIOS_I2C_CheckClear(pios_i2c_external_adapter_id) != 0)
 		panic(5);
-
+#endif
 #if defined(PIOS_INCLUDE_LSM9DS1)
+#if !defined(LSM9DS1_USE_SPI)
 	if (PIOS_LSM9DS1_Probe(pios_i2c_external_adapter_id, lsm9ds1_cfg.i2c_addr_ax_g) == LSM9DS1_WHO_AM_I_VAL)
+#endif
 	{
 		int retval;
+#if defined(LSM9DS1_USE_SPI)
+		retval = PIOS_LSM9DS1_Init(pios_i2c_external_adapter_id, 0, 1, &lsm9ds1_cfg);
+#else
 		retval = PIOS_LSM9DS1_Init(pios_i2c_external_adapter_id, &lsm9ds1_cfg);
+#endif
 		if (retval == -10)
 			panic(1); // indicate missing IRQ separately
 		if (retval != 0)
@@ -972,7 +982,6 @@ void PIOS_Board_Init(void) {
 	//I2C is slow, sensor init as well, reset watchdog to prevent reset here
 	PIOS_WDG_Clear();
 
-#endif	/* PIOS_INCLUDE_I2C */
 
 
 #if defined(PIOS_INCLUDE_GPIO)
