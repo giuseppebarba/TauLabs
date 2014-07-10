@@ -279,8 +279,11 @@ struct pios_lsm9ds1_cfg {
 	enum pios_lsm9ds1_odr_g gyro_odr;
 	enum pios_lsm9ds1_odr_m mag_odr;
 };
-
+#if defined(LSM9DS1_USE_SPI)
+uint8_t PIOS_LSM9DS1_Probe();
+#else
 uint8_t PIOS_LSM9DS1_Probe(uint32_t i2c_id, uint8_t i2c_addr);
+#endif
 int32_t PIOS_LSM9DS1_SetGyroRange(enum pios_lsm9ds1_fs_g gyro_fs);
 int32_t PIOS_LSM9DS1_SetAccRange(enum pios_lsm9ds1_fs_xl accel_fs);
 int32_t PIOS_LSM9DS1_SetMagRange(enum pios_lsm9ds1_fs_m mag_fs);
@@ -290,7 +293,7 @@ int32_t PIOS_LSM9DS1_SetMagODR(enum pios_lsm9ds1_odr_m odr);
 bool PIOS_LSM9DS1_IRQHandler(void);
 #if defined(LSM9DS1_USE_SPI)
 int32_t PIOS_LSM9DS1_Init(uint32_t spi_id, uint32_t AxG_slave_num,
-					uint32_t Mag_slave_num, const struct pios_lsm9ds1_cfg * cfg)
+					uint32_t Mag_slave_num, const struct pios_lsm9ds1_cfg * cfg);
 #else
 int32_t PIOS_LSM9DS1_Init(uint32_t i2c_id, const struct pios_lsm9ds1_cfg * cfg);
 #endif

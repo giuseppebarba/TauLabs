@@ -77,6 +77,8 @@ struct lsm9ds1_dev {
 //! Global structure for this device device
 static struct lsm9ds1_dev *dev;
 
+static int32_t PIOS_LSM9DS1_Validate(struct lsm9ds1_dev *dev);
+
 #if defined(LSM9DS1_USE_SPI)
 /**
  * @brief Claim the SPI bus for the communications and select this chip
@@ -127,19 +129,19 @@ static uint8_t PIOS_LSM9DS1_Read_SPI(uint32_t slave_num, uint8_t reg,
 		return -1;
 
 	if (PIOS_SPI_TransferByte(dev->spi_id, 0x80 | reg) < 0) {
-		rc = -2;
+		ret = -2;
 		goto out;
 	}
 	if (PIOS_SPI_TransferBlock(dev->spi_id, NULL, buffer, len, NULL) < 0) {
-		rc = -3;
+		ret = -3;
 		goto out;
 	}
 
-	rc = 0;
+	ret = 0;
 out:
 	PIOS_LSM9DS1_ReleaseBus(slave_num);
 
-	return rc;
+	return ret;
 }
 
 /**
@@ -156,14 +158,16 @@ static int32_t PIOS_LSM9DS1_Write_SPI(uint32_t slave_num, uint8_t reg, uint8_t d
 		return -1;
 
 	if (PIOS_SPI_TransferByte(dev->spi_id, 0x7F | reg) < 0) {
-		rc = -2;
+		ret = -2;
 		goto out;
 	}
 	PIOS_SPI_TransferByte(dev->spi_id, data);
 
 	PIOS_LSM9DS1_ReleaseBus(slave_num);
 
-	return 0;
+	ret = 0;
+out:
+	return ret;
 }
 
 #else
@@ -756,7 +760,7 @@ uint8_t PIOS_LSM9DS1_Probe(uint32_t i2c_id, uint8_t i2c_addr)
 	if (PIOS_I2C_Transfer(i2c_id, txn_list, NELEMENTS(txn_list)) < 0)
 		return -1;
 
-	return (read != MPU9250_WHOAMI_ID);
+	return (read != LSM9DS1_WHO_AM_I_VAL);
 #endif
 }
 
@@ -848,17 +852,17 @@ static void PIOS_LSM9DS1_Task(void *parameters)
 	}
 }
 
-#if defined(LSM9DS1_USE_SPI)
-int32_t PIOS_LSM9DS1_Init(uint32_t spi_id, uint32_t AxG_slave_num,
-					uint32_t Mag_slave_num, const struct pios_lsm9ds1_cfg * cfg)
-#else
 /**
  * @brief Initialize the LSM9DS1 sensor over I2C interface.
  * @return 0 for success, -1 for failure to allocate, -2 for failure to get irq
  */
+#if defined(LSM9DS1_USE_SPI)
+int32_t PIOS_LSM9DS1_Init(uint32_t spi_id, uint32_t AxG_slave_num,
+					uint32_t Mag_slave_num, const struct pios_lsm9ds1_cfg * cfg)
+#else
 int32_t PIOS_LSM9DS1_Init(uint32_t i2c_id, const struct pios_lsm9ds1_cfg * cfg)
-{
 #endif
+{
 	dev = PIOS_LSM9DS1_alloc();
 	if (dev == NULL)
 		return -1;
@@ -881,16 +885,6 @@ int32_t PIOS_LSM9DS1_Init(uint32_t i2c_id, const struct pios_lsm9ds1_cfg * cfg)
 	if (PIOS_LSM9DS1_Config(cfg) != 0)
 		return -2;
 
-	/* Set up EXTI line */
-	PIOS_EXTI_Init(cfg->exti_cfg);
-
-	// Wait 5 ms for data ready interrupt and make sure it happens
-	// twice
-	if ((xSemaphoreTake(dev->data_ready_sema, 5) != pdTRUE) ||
-	    (xSemaphoreTake(dev->data_ready_sema, 5) != pdTRUE)) {
-		return -10;
-	}
-
 	int result = xTaskCreate(PIOS_LSM9DS1_Task,
 				 (const signed char *)"PIOS_LSM9DS1_Task",
 				 LSM9DS1_TASK_STACK, NULL,
@@ -898,6 +892,9 @@ int32_t PIOS_LSM9DS1_Init(uint32_t i2c_id, const struct pios_lsm9ds1_cfg * cfg)
 				 &dev->TaskHandle);
 
 	PIOS_Assert(result == pdPASS);
+
+	/* Set up EXTI line */
+		PIOS_EXTI_Init(cfg->exti_cfg);
 
 	PIOS_SENSORS_Register(PIOS_SENSOR_ACCEL, dev->accel_queue);
 	PIOS_SENSORS_Register(PIOS_SENSOR_GYRO, dev->gyro_queue);
